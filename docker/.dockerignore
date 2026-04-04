@@ -1,0 +1,7 @@
+target/
+.git/
+.env
+grafana/
+docker/
+*.md
+schema.sql

@@ -22,6 +22,7 @@ pub fn create_pool(config: &Config) -> Result<Pool> {
 pub async fn ensure_schema(pool: &Pool) -> Result<()> {
     let client = pool.get().await.context("Failed to get DB connection")?;
 
+    // Create tables and hypertables
     client
         .batch_execute(
             "CREATE TABLE IF NOT EXISTS enphase_readings (
@@ -44,10 +45,87 @@ pub async fn ensure_schema(pool: &Pool) -> Result<()> {
                 is_charging         BOOLEAN
             );
 
-            SELECT create_hypertable('tesla_readings', 'time', if_not_exists => TRUE);",
+            SELECT create_hypertable('tesla_readings', 'time', if_not_exists => TRUE);
+
+            CREATE INDEX IF NOT EXISTS idx_enphase_time_desc ON enphase_readings (time DESC);
+            CREATE INDEX IF NOT EXISTS idx_tesla_time_desc ON tesla_readings (time DESC);
+            CREATE INDEX IF NOT EXISTS idx_tesla_charging ON tesla_readings (time DESC) WHERE is_charging = TRUE;",
         )
         .await
         .context("Failed to ensure database schema")?;
+
+    // Continuous aggregates must be created individually — they can't be mixed
+    // with other statements, and IF NOT EXISTS support varies by TimescaleDB version.
+    let aggregates = [
+        (
+            "enphase_5min",
+            "CREATE MATERIALIZED VIEW IF NOT EXISTS enphase_5min
+            WITH (timescaledb.continuous) AS
+            SELECT
+                time_bucket('5 minutes', time) AS bucket,
+                avg(solar_w)         AS avg_solar_w,
+                avg(house_total_w)   AS avg_house_w,
+                avg(grid_net_w)      AS avg_grid_w,
+                max(solar_w)         AS peak_solar_w,
+                sum(solar_w) / 30    AS solar_wh_5min
+            FROM enphase_readings
+            GROUP BY bucket;",
+        ),
+        (
+            "enphase_hourly",
+            "CREATE MATERIALIZED VIEW IF NOT EXISTS enphase_hourly
+            WITH (timescaledb.continuous) AS
+            SELECT
+                time_bucket('1 hour', time) AS bucket,
+                avg(solar_w)         AS avg_solar_w,
+                avg(house_total_w)   AS avg_house_w,
+                max(solar_w)         AS peak_solar_w,
+                sum(solar_w) / 360   AS solar_wh_hourly
+            FROM enphase_readings
+            GROUP BY bucket;",
+        ),
+        (
+            "tesla_5min",
+            "CREATE MATERIALIZED VIEW IF NOT EXISTS tesla_5min
+            WITH (timescaledb.continuous) AS
+            SELECT
+                time_bucket('5 minutes', time) AS bucket,
+                avg(charging_w)      AS avg_charging_w,
+                max(charging_w)      AS peak_charging_w,
+                sum(charging_w) / 30 AS charging_wh_5min,
+                bool_or(is_charging) AS any_charging
+            FROM tesla_readings
+            GROUP BY bucket;",
+        ),
+        (
+            "tesla_hourly",
+            "CREATE MATERIALIZED VIEW IF NOT EXISTS tesla_hourly
+            WITH (timescaledb.continuous) AS
+            SELECT
+                time_bucket('1 hour', time) AS bucket,
+                avg(charging_w)       AS avg_charging_w,
+                max(charging_w)       AS peak_charging_w,
+                sum(charging_w) / 360 AS charging_wh_hourly,
+                bool_or(is_charging)  AS any_charging
+            FROM tesla_readings
+            GROUP BY bucket;",
+        ),
+    ];
+
+    for (name, sql) in &aggregates {
+        if let Err(e) = client.batch_execute(sql).await {
+            warn!("Could not create continuous aggregate {name}: {e}");
+        }
+    }
+
+    // Retention policies
+    client
+        .batch_execute(
+            "SELECT add_retention_policy('enphase_readings', INTERVAL '90 days', if_not_exists => TRUE);
+            SELECT add_retention_policy('tesla_readings', INTERVAL '90 days', if_not_exists => TRUE);",
+        )
+        .await
+        .context("Failed to set retention policies")?;
 
     info!("Database schema verified");
     Ok(())

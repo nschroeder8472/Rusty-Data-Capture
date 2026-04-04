@@ -1,7 +1,7 @@
 # Solar Energy Monitoring System - Design Document
 
-**Version:** 1.0  
-**Date:** February 21, 2026  
+**Version:** 1.1  
+**Date:** April 4, 2026  
 **Author:** System Design  
 
 ---
@@ -53,7 +53,7 @@ This document outlines the design for a real-time solar energy monitoring system
               ┌──────────────────────────────┐
               │   TimescaleDB                │
               │   (PostgreSQL + Extension)   │
-              │   • Hypertable: energy       │
+              │   • Hypertables (per source) │
               │   • Continuous aggregates    │
               │   • Retention policies       │
               └──────────────────────────────┘
@@ -180,74 +180,97 @@ tesla_charging_watts = (voltageA_v × currentA_a) + (voltageB_v × currentB_a)
 
 ### 4.1 TimescaleDB Schema
 
+> **Design decision:** Data sources use separate hypertables rather than a single unified
+> table. This allows independent sampling rates (Enphase SSE ~1s vs Tesla polling ~10s),
+> cleaner schema evolution when adding new data sources, and avoids sparse rows when one
+> source is offline. Derived metrics are computed at query time in Grafana using JOINs.
+
 ```sql
 -- Create extension
 CREATE EXTENSION IF NOT EXISTS timescaledb;
 
--- Main hypertable for all energy metrics
-CREATE TABLE energy (
-  time            TIMESTAMPTZ NOT NULL,
-  
-  -- Enphase raw metrics
-  solar_w         DOUBLE PRECISION,
-  solar_voltage   DOUBLE PRECISION,
-  solar_frequency DOUBLE PRECISION,
-  house_total_w   DOUBLE PRECISION,
-  grid_net_w      DOUBLE PRECISION,  -- negative = exporting
-  
-  -- Tesla raw metrics
-  tesla_w                DOUBLE PRECISION DEFAULT 0,
-  tesla_session_wh       DOUBLE PRECISION DEFAULT 0,
-  tesla_lifetime_kwh     DOUBLE PRECISION,
-  tesla_vehicle_connected SMALLINT DEFAULT 0,  -- boolean as 0/1
-  tesla_is_charging      SMALLINT DEFAULT 0,
-  
-  -- Derived metrics (computed by Rust before insert)
-  house_excl_tesla_w        DOUBLE PRECISION,  -- house_total_w - tesla_w
-  net_solar_vs_total_w      DOUBLE PRECISION,  -- solar_w - house_total_w
-  net_solar_vs_house_only_w DOUBLE PRECISION   -- solar_w - house_excl_tesla_w
+-- Enphase IQ Gateway readings (~8,640 rows/day at 10s write interval)
+CREATE TABLE IF NOT EXISTS enphase_readings (
+    time             TIMESTAMPTZ      NOT NULL,
+    solar_w          DOUBLE PRECISION,
+    solar_voltage    DOUBLE PRECISION,
+    solar_frequency  DOUBLE PRECISION,
+    house_total_w    DOUBLE PRECISION,
+    grid_net_w       DOUBLE PRECISION   -- negative = exporting
 );
 
--- Convert to hypertable (TimescaleDB magic)
-SELECT create_hypertable('energy', 'time');
+SELECT create_hypertable('enphase_readings', 'time', if_not_exists => TRUE);
+
+-- Tesla Wall Connector readings (~8,640 rows/day at 10s write interval)
+CREATE TABLE IF NOT EXISTS tesla_readings (
+    time                TIMESTAMPTZ      NOT NULL,
+    charging_w          DOUBLE PRECISION,
+    session_wh          DOUBLE PRECISION,
+    lifetime_kwh        DOUBLE PRECISION,
+    vehicle_connected   BOOLEAN,
+    is_charging         BOOLEAN
+);
+
+SELECT create_hypertable('tesla_readings', 'time', if_not_exists => TRUE);
 
 -- Indexes for common queries
-CREATE INDEX idx_energy_time_desc ON energy (time DESC);
-CREATE INDEX idx_energy_charging ON energy (time DESC) 
-  WHERE tesla_is_charging = 1;
+CREATE INDEX IF NOT EXISTS idx_enphase_time_desc ON enphase_readings (time DESC);
+CREATE INDEX IF NOT EXISTS idx_tesla_time_desc ON tesla_readings (time DESC);
+CREATE INDEX IF NOT EXISTS idx_tesla_charging ON tesla_readings (time DESC)
+  WHERE is_charging = TRUE;
 
--- Continuous aggregate: 5-minute averages
-CREATE MATERIALIZED VIEW energy_5min
+-- Continuous aggregates: Enphase 5-minute averages
+CREATE MATERIALIZED VIEW IF NOT EXISTS enphase_5min
 WITH (timescaledb.continuous) AS
-SELECT 
-  time_bucket('5 minutes', time) AS bucket,
-  avg(solar_w) AS avg_solar_w,
-  avg(house_total_w) AS avg_house_w,
-  avg(tesla_w) AS avg_tesla_w,
-  avg(grid_net_w) AS avg_grid_w,
-  max(solar_w) AS peak_solar_w,
-  max(tesla_w) AS peak_tesla_w,
-  sum(solar_w) / 12 AS solar_wh_5min  -- watts to watt-hours (5min = 1/12 hour)
-FROM energy
+SELECT
+    time_bucket('5 minutes', time) AS bucket,
+    avg(solar_w)         AS avg_solar_w,
+    avg(house_total_w)   AS avg_house_w,
+    avg(grid_net_w)      AS avg_grid_w,
+    max(solar_w)         AS peak_solar_w,
+    sum(solar_w) / 30    AS solar_wh_5min   -- 30 samples at 10s = 5 min
+FROM enphase_readings
 GROUP BY bucket;
 
--- Continuous aggregate: hourly rollups
-CREATE MATERIALIZED VIEW energy_hourly
+-- Continuous aggregates: Enphase hourly rollups
+CREATE MATERIALIZED VIEW IF NOT EXISTS enphase_hourly
 WITH (timescaledb.continuous) AS
-SELECT 
-  time_bucket('1 hour', time) AS bucket,
-  avg(solar_w) AS avg_solar_w,
-  avg(house_total_w) AS avg_house_w,
-  avg(tesla_w) AS avg_tesla_w,
-  max(solar_w) AS peak_solar_w,
-  sum(solar_w) / 60 AS solar_wh_hourly,  -- approximate Wh from avg watts
-  sum(tesla_w) / 60 AS tesla_wh_hourly
-FROM energy
+SELECT
+    time_bucket('1 hour', time) AS bucket,
+    avg(solar_w)         AS avg_solar_w,
+    avg(house_total_w)   AS avg_house_w,
+    max(solar_w)         AS peak_solar_w,
+    sum(solar_w) / 360   AS solar_wh_hourly  -- 360 samples at 10s = 1 hour
+FROM enphase_readings
+GROUP BY bucket;
+
+-- Continuous aggregates: Tesla 5-minute averages
+CREATE MATERIALIZED VIEW IF NOT EXISTS tesla_5min
+WITH (timescaledb.continuous) AS
+SELECT
+    time_bucket('5 minutes', time) AS bucket,
+    avg(charging_w)      AS avg_charging_w,
+    max(charging_w)      AS peak_charging_w,
+    sum(charging_w) / 30 AS charging_wh_5min,
+    bool_or(is_charging) AS any_charging
+FROM tesla_readings
+GROUP BY bucket;
+
+-- Continuous aggregates: Tesla hourly rollups
+CREATE MATERIALIZED VIEW IF NOT EXISTS tesla_hourly
+WITH (timescaledb.continuous) AS
+SELECT
+    time_bucket('1 hour', time) AS bucket,
+    avg(charging_w)       AS avg_charging_w,
+    max(charging_w)       AS peak_charging_w,
+    sum(charging_w) / 360 AS charging_wh_hourly,
+    bool_or(is_charging)  AS any_charging
+FROM tesla_readings
 GROUP BY bucket;
 
 -- Retention policy: keep raw data for 90 days, aggregates forever
-SELECT add_retention_policy('energy', INTERVAL '90 days');
--- 5-min and hourly aggregates retained indefinitely
+SELECT add_retention_policy('enphase_readings', INTERVAL '90 days', if_not_exists => TRUE);
+SELECT add_retention_policy('tesla_readings', INTERVAL '90 days', if_not_exists => TRUE);
 ```
 
 ### 4.2 Data Retention Strategy
@@ -341,9 +364,9 @@ SELECT add_retention_policy('energy', INTERVAL '90 days');
 ```toml
 [dependencies]
 tokio = { version = "1", features = ["full"] }
-tokio-postgres = "0.7"
+tokio-postgres = { version = "0.7", features = ["with-chrono-0_4"] }
 deadpool-postgres = "0.14"  # Connection pooling
-reqwest = { version = "0.12", features = ["rustls-tls", "stream", "json"] }
+reqwest = { version = "0.13", features = ["stream", "json"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 futures = "0.3"
@@ -351,8 +374,8 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 dotenvy = "0.15"
 anyhow = "1"
-thiserror = "1"
-chrono = "0.4"
+thiserror = "2"
+chrono = { version = "0.4", features = ["serde"] }
 ```
 
 ### 5.4 Configuration (.env)
@@ -370,15 +393,16 @@ TESLA_POLL_INTERVAL_SECS=10
 DATABASE_URL=postgresql://user:password@localhost:5432/solar
 DB_POOL_SIZE=5
 
-# Cost Calculation (for derived metrics)
-ELECTRIC_RATE_PER_KWH=0.16      # $/kWh
-GAS_PRICE_PER_GALLON=3.80       # $/gallon
-TESLA_MILES_PER_KWH=3.5         # Model 3 LR efficiency
-ICE_MPG=30.0                    # Comparison vehicle
+# Writer
+WRITE_INTERVAL_SECS=10
 
 # Logging
 RUST_LOG=info  # debug, info, warn, error
 ```
+
+> **Note:** Cost calculation parameters (electric rate, gas price, Tesla efficiency, ICE MPG)
+> are configured as Grafana dashboard variables rather than application-level config. This
+> allows adjusting rates without restarting the collector. See section 7.3.
 
 ---
 
@@ -394,45 +418,62 @@ RUST_LOG=info  # debug, info, warn, error
 | `tesla_w` | Tesla vitals calculated | W | Instantaneous charging power |
 | `tesla_session_wh` | Tesla vitals | Wh | Energy in current charge session |
 
-### 6.2 Derived Metrics (Computed)
+### 6.2 Derived Metrics (Computed in Grafana)
+
+These are computed at query time using JOINs between the two tables, not pre-stored:
 
 | Metric | Formula | Description |
 |--------|---------|-------------|
-| `house_excl_tesla_w` | `house_total_w - tesla_w` | House consumption without EV charging |
+| `house_excl_tesla_w` | `house_total_w - COALESCE(charging_w, 0)` | House consumption without EV charging |
 | `net_solar_vs_total_w` | `solar_w - house_total_w` | Surplus/deficit including Tesla |
 | `net_solar_vs_house_only_w` | `solar_w - house_excl_tesla_w` | Surplus/deficit excluding Tesla |
 
+Example combined query:
+```sql
+SELECT
+  time_bucket('$interval', e.time) AS time,
+  avg(e.solar_w) AS solar_w,
+  avg(e.house_total_w) - COALESCE(avg(t.charging_w), 0) AS house_excl_tesla_w,
+  avg(e.solar_w) - avg(e.house_total_w) AS net_solar_vs_total_w
+FROM enphase_readings e
+LEFT JOIN tesla_readings t
+  ON time_bucket('$interval', e.time) = time_bucket('$interval', t.time)
+WHERE $__timeFilter(e.time)
+GROUP BY 1 ORDER BY 1
+```
+
 ### 6.3 Cost Calculations (Grafana Layer)
 
-These are computed in Grafana queries, not stored:
+These are computed in Grafana queries using dashboard variables (`$electric_rate`, `$gas_price`,
+`$tesla_efficiency`, `$ice_mpg`), not stored:
 
 **Daily Solar Savings:**
 ```sql
-SELECT 
+SELECT
   time_bucket('1 day', time) AS day,
-  (sum(solar_w) / 3600) * 0.16 AS daily_solar_savings_usd
-FROM energy
+  (sum(solar_w) / 3600.0) * ${electric_rate} / 1000.0 AS daily_solar_savings_usd
+FROM enphase_readings
 WHERE time > now() - interval '30 days'
 GROUP BY day;
 ```
 
 **Tesla Fuel Savings (vs. Gasoline):**
 ```sql
-SELECT 
+SELECT
   time_bucket('1 day', time) AS day,
   -- Energy used for charging (kWh)
-  sum(tesla_w) / 3600 / 1000 AS kwh_charged,
+  sum(charging_w) / 3600.0 / 1000.0 AS kwh_charged,
   -- Equivalent miles driven
-  (sum(tesla_w) / 3600 / 1000) * 3.5 AS miles_driven,
+  (sum(charging_w) / 3600.0 / 1000.0) * ${tesla_efficiency} AS miles_driven,
   -- Gasoline cost equivalent
-  ((sum(tesla_w) / 3600 / 1000) * 3.5 / 30.0) * 3.80 AS gas_cost,
+  ((sum(charging_w) / 3600.0 / 1000.0) * ${tesla_efficiency} / ${ice_mpg}) * ${gas_price} AS gas_cost,
   -- Electricity cost
-  (sum(tesla_w) / 3600 / 1000) * 0.16 AS elec_cost,
+  (sum(charging_w) / 3600.0 / 1000.0) * ${electric_rate} AS elec_cost,
   -- Net savings
-  (((sum(tesla_w) / 3600 / 1000) * 3.5 / 30.0) * 3.80) - 
-  ((sum(tesla_w) / 3600 / 1000) * 0.16) AS net_savings_usd
-FROM energy
-WHERE tesla_is_charging = 1
+  (((sum(charging_w) / 3600.0 / 1000.0) * ${tesla_efficiency} / ${ice_mpg}) * ${gas_price}) -
+  ((sum(charging_w) / 3600.0 / 1000.0) * ${electric_rate}) AS net_savings_usd
+FROM tesla_readings
+WHERE is_charging = TRUE
   AND time > now() - interval '30 days'
 GROUP BY day;
 ```
@@ -490,44 +531,46 @@ GROUP BY day;
 
 ### 7.2 Panel Specifications
 
-**Panel 1: Solar Generation (Stat + Time Series)**
-- Query: `SELECT solar_w FROM energy WHERE $__timeFilter(time)`
-- Visualization: Stat (big number) + Area graph
-- Thresholds: 0% (red), 30% (yellow), 70% (green) of system max
-- Time range: Last 6 hours (configurable)
+> **Implementation:** Dashboard JSON is in `grafana/dashboard.json` — import via
+> Grafana UI (Dashboards → Import). On import, select the TimescaleDB/PostgreSQL data source.
+
+**Panel 1: Solar Generation (Stat)**
+- Query: `SELECT time, solar_w FROM enphase_readings WHERE $__timeFilter(time) ORDER BY time DESC LIMIT 1`
+- Visualization: Stat with sparkline
+- Thresholds: <500W (red), 500-1500W (yellow), >1500W (green)
 
 **Panel 2: House Load (Stat)**
-- Query: `SELECT house_total_w FROM energy WHERE $__timeFilter(time)`
-- Display: Current value in kW
-- Color: Based on % of main breaker rating
+- Query: `SELECT time, house_total_w FROM enphase_readings WHERE $__timeFilter(time) ORDER BY time DESC LIMIT 1`
+- Display: Current value in watts
+- Thresholds: <3000W (green), 3000-5000W (yellow), >5000W (red)
 
 **Panel 3: Tesla Charging (Stat)**
-- Query: `SELECT tesla_w, tesla_is_charging FROM energy WHERE $__timeFilter(time) ORDER BY time DESC LIMIT 1`
-- Display: "Charging X kW" or "Not charging"
-- Icon changes based on state
+- Query: `SELECT time, charging_w FROM tesla_readings WHERE $__timeFilter(time) ORDER BY time DESC LIMIT 1`
+- Display: Current charging power in watts
+- Thresholds: 0W (dark blue), >0W (blue), >5000W (purple)
 
 **Panel 4: Power Flow Time Series**
-- Query combines 4 series: solar, house (excl Tesla), grid, Tesla
-- Stacked area chart
-- Legend shows current values
+- 4 independent queries (Solar, House excl Tesla, Grid, Tesla) bucketed by `$interval`
+- House excl Tesla uses LEFT JOIN: `avg(e.house_total_w) - COALESCE(avg(t.charging_w), 0)`
+- Smooth line chart with 20% fill opacity
+- Legend shows lastNotNull, mean, max
 
 **Panel 5: Net Solar vs Total (Positive/Negative Fill)**
-- Query: `SELECT net_solar_vs_total_w FROM energy`
-- Green fill above 0 (exporting)
-- Red fill below 0 (importing)
+- Query: `avg(solar_w) - avg(house_total_w)` from `enphase_readings`
+- Green-yellow-red gradient (green above 0 = exporting, red below 0 = importing)
 
 **Panel 6: Net Solar vs House Only**
-- Same as Panel 5 but uses `net_solar_vs_house_only_w`
+- Uses LEFT JOIN to subtract Tesla charging from house total
 - Shows if house alone would be grid-independent
 
 **Panel 7: Solar Savings (Bar Chart)**
-- Query: Daily aggregation with `time_bucket('1 day', ...)`
-- 30-day history
-- USD values
+- Query: Daily `sum(solar_w) / 3600.0 * $electric_rate / 1000.0` from `enphase_readings`
+- 30-day history, USD values
 
-**Panel 8: Tesla Fuel Savings (Table + Stat)**
-- Query computes gas equivalent vs. electric cost
-- Displays breakdown and net savings
+**Panel 8: Tesla Fuel Savings (Table)**
+- Daily breakdown: kWh charged, equivalent miles, gas cost, electric cost, net savings
+- Uses `$tesla_efficiency`, `$ice_mpg`, `$gas_price`, `$electric_rate` dashboard variables
+- Footer row with column sums
 
 ### 7.3 Dashboard Variables
 
@@ -824,6 +867,7 @@ services:
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-02-21 | Initial design document |
+| 1.1 | 2026-04-04 | Adopted two-table schema (enphase_readings + tesla_readings) for flexibility; derived metrics computed in Grafana via JOINs; cost calc params moved to Grafana dashboard variables; added Grafana dashboard JSON; updated dependencies to match implementation; schema alignment with indexes, continuous aggregates, and retention policies |
 
 ---
 

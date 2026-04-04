@@ -1,0 +1,61 @@
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: solar
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: solar
+    volumes:
+      - timescale-data:/var/lib/postgresql/data
+      - ../schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U solar"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+      DB_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ../grafana/dashboard.json:/var/lib/grafana/dashboards/solar-monitor.json:ro
+      - ../grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "3000:3000"
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+
+  solar-collector:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    restart: unless-stopped
+    environment:
+      ENVOY_HOST: ${ENVOY_HOST}
+      ENVOY_TOKEN: ${ENVOY_TOKEN}
+      TESLA_HOST: ${TESLA_HOST}
+      TESLA_POLL_INTERVAL_SECS: ${TESLA_POLL_INTERVAL_SECS:-10}
+      DATABASE_URL: postgresql://solar:${DB_PASSWORD}@timescaledb:5432/solar
+      DB_POOL_SIZE: ${DB_POOL_SIZE:-5}
+      WRITE_INTERVAL_SECS: ${WRITE_INTERVAL_SECS:-10}
+      RUST_LOG: ${RUST_LOG:-info}
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  timescale-data:
+  grafana-data:
