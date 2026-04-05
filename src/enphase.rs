@@ -71,7 +71,10 @@ async fn stream_loop(config: &Config, state: &Arc<Mutex<SharedState>>) -> Result
 
     while let Some(chunk) = stream.next().await {
         let chunk = chunk?;
-        buffer.push_str(&String::from_utf8_lossy(&chunk));
+        // Normalize \r\n to \n so SSE delimiter detection works
+        // regardless of whether the gateway sends \r\n or \n
+        let text = String::from_utf8_lossy(&chunk).replace("\r\n", "\n");
+        buffer.push_str(&text);
 
         while let Some(pos) = buffer.find("\n\n") {
             let event = buffer[..pos].to_string();
