@@ -323,7 +323,7 @@
       "gridPos": { "h": 6, "w": 16, "x": 8, "y": 17 },
       "targets": [
         {
-          "rawSql": "SELECT time_bucket('${interval}', time) AS time, CASE WHEN avg(house_total_w) > 0 THEN LEAST(avg(solar_w) / avg(house_total_w) * 100, 200) ELSE 0 END AS \"Solar Offset (%)\" FROM enphase_readings WHERE $__timeFilter(time) GROUP BY 1 ORDER BY 1",
+          "rawSql": "SELECT time_bucket('${interval}', time) AS time, CASE WHEN avg(house_total_w) > 0 THEN avg(solar_w) / avg(house_total_w) * 100 ELSE 0 END AS \"Solar Offset (%)\" FROM enphase_readings WHERE $__timeFilter(time) GROUP BY 1 ORDER BY 1",
           "format": "time_series",
           "refId": "A"
         }

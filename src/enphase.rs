@@ -145,7 +145,8 @@ async fn stream_loop(config: &Config, state: &Arc<Mutex<SharedState>>) -> Result
             match parse_sse_event(&data) {
                 Ok(payload) => {
                     let mut shared = state.lock().unwrap();
-                    shared.enphase.solar_w = payload.production.total_p();
+                    let raw_solar = payload.production.total_p();
+                    shared.enphase.solar_w = if raw_solar < 50.0 { 0.0 } else { raw_solar };
                     shared.enphase.solar_voltage = payload.production.ph_a.v;
                     shared.enphase.solar_frequency = payload.production.ph_a.f;
                     shared.enphase.solar_q = payload.production.total_q();
