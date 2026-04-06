@@ -81,6 +81,14 @@
         "type": "textbox",
         "current": { "text": "30.0", "value": "30.0" },
         "query": "30.0"
+      },
+      {
+        "name": "timezone",
+        "label": "Timezone",
+        "type": "textbox",
+        "current": { "text": "America/Chicago", "value": "America/Chicago" },
+        "query": "America/Chicago",
+        "description": "IANA timezone name for daily bucketing (e.g. America/Chicago, America/New_York, America/Los_Angeles)"
       }
     ]
   },
@@ -275,7 +283,7 @@
       "gridPos": { "h": 6, "w": 8, "x": 0, "y": 17 },
       "targets": [
         {
-          "rawSql": "SELECT now() AS time, CASE WHEN avg(house_total_w) > 0 THEN LEAST(avg(solar_w) / avg(house_total_w) * 100, 100) ELSE 0 END AS \"Solar Offset (%)\" FROM enphase_readings WHERE $__timeFilter(time)",
+          "rawSql": "SELECT now() AS time, CASE WHEN avg(house_total_w) > 0 THEN avg(solar_w) / avg(house_total_w) * 100 ELSE 0 END AS \"Solar Offset (%)\" FROM enphase_readings WHERE $__timeFilter(time)",
           "format": "table",
           "refId": "A"
         }
@@ -284,7 +292,6 @@
         "defaults": {
           "unit": "percent",
           "min": 0,
-          "max": 100,
           "color": { "mode": "thresholds" },
           "thresholds": {
             "mode": "absolute",
@@ -447,7 +454,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 33 },
       "targets": [
         {
-          "rawSql": "SELECT time_bucket('1 day', time) AS time, (sum(solar_w) / 3600.0) * ${electric_rate} / 1000.0 AS \"Solar Savings ($)\" FROM enphase_readings WHERE time > now() - INTERVAL '30 days' GROUP BY 1 ORDER BY 1",
+          "rawSql": "SELECT time_bucket('1 day', time AT TIME ZONE '${timezone}') AT TIME ZONE '${timezone}' AS time, (sum(solar_w) / 3600.0) * ${electric_rate} / 1000.0 AS \"Solar Savings ($)\" FROM enphase_readings WHERE time > now() - INTERVAL '30 days' GROUP BY 1 ORDER BY 1",
           "format": "time_series",
           "refId": "A"
         }
@@ -473,7 +480,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 33 },
       "targets": [
         {
-          "rawSql": "SELECT time_bucket('1 day', time) AS \"Day\", round(CAST(sum(charging_w) / 3600.0 / 1000.0 AS numeric), 2) AS \"kWh Charged\", round(CAST((sum(charging_w) / 3600.0 / 1000.0) * ${tesla_efficiency} AS numeric), 1) AS \"Miles Equivalent\", round(CAST(((sum(charging_w) / 3600.0 / 1000.0) * ${tesla_efficiency} / ${ice_mpg}) * ${gas_price} AS numeric), 2) AS \"Gas Cost ($)\", round(CAST((sum(charging_w) / 3600.0 / 1000.0) * ${electric_rate} AS numeric), 2) AS \"Electric Cost ($)\", round(CAST(((sum(charging_w) / 3600.0 / 1000.0) * ${tesla_efficiency} / ${ice_mpg}) * ${gas_price} - (sum(charging_w) / 3600.0 / 1000.0) * ${electric_rate} AS numeric), 2) AS \"Net Savings ($)\" FROM tesla_readings WHERE is_charging = TRUE AND time > now() - INTERVAL '30 days' GROUP BY 1 ORDER BY 1 DESC",
+          "rawSql": "SELECT time_bucket('1 day', time AT TIME ZONE '${timezone}') AT TIME ZONE '${timezone}' AS \"Day\", round(CAST(sum(charging_w) / 3600.0 / 1000.0 AS numeric), 2) AS \"kWh Charged\", round(CAST((sum(charging_w) / 3600.0 / 1000.0) * ${tesla_efficiency} AS numeric), 1) AS \"Miles Equivalent\", round(CAST(((sum(charging_w) / 3600.0 / 1000.0) * ${tesla_efficiency} / ${ice_mpg}) * ${gas_price} AS numeric), 2) AS \"Gas Cost ($)\", round(CAST((sum(charging_w) / 3600.0 / 1000.0) * ${electric_rate} AS numeric), 2) AS \"Electric Cost ($)\", round(CAST(((sum(charging_w) / 3600.0 / 1000.0) * ${tesla_efficiency} / ${ice_mpg}) * ${gas_price} - (sum(charging_w) / 3600.0 / 1000.0) * ${electric_rate} AS numeric), 2) AS \"Net Savings ($)\" FROM tesla_readings WHERE is_charging = TRUE AND time > now() - INTERVAL '30 days' GROUP BY 1 ORDER BY 1 DESC",
           "format": "table",
           "refId": "A"
         }
