@@ -930,7 +930,7 @@
       "targets": [
         {
           "format": "time_series",
-          "rawSql": "SELECT time_bucket('1 day', time AT TIME ZONE '${timezone}') AT TIME ZONE '${timezone}' AS time, (sum(solar_w) / 3600.0) * ${electric_rate} / 1000.0 AS \"Solar Savings ($)\" FROM enphase_readings WHERE time > now() - INTERVAL '30 days' GROUP BY 1 ORDER BY 1",
+          "rawSql": "SELECT time_bucket('1 day', time AT TIME ZONE '${timezone}') AT TIME ZONE '${timezone}' AS time, (sum(solar_w) * 10.0 / 3600.0) * ${electric_rate} / 1000.0 AS \"Solar Savings ($)\" FROM enphase_readings WHERE time > now() - INTERVAL '30 days' GROUP BY 1 ORDER BY 1",
           "refId": "A"
         }
       ],
@@ -1067,7 +1067,7 @@
       "targets": [
         {
           "format": "table",
-          "rawSql": "SELECT time_bucket('1 day', time AT TIME ZONE '${timezone}') AT TIME ZONE '${timezone}' AS \"Day\", round(CAST(sum(charging_w) / 3600.0 / 1000.0 AS numeric), 2) AS \"kWh Charged\", round(CAST((sum(charging_w) / 3600.0 / 1000.0) * ${tesla_efficiency} AS numeric), 1) AS \"Miles Equivalent\", round(CAST(((sum(charging_w) / 3600.0 / 1000.0) * ${tesla_efficiency} / ${ice_mpg}) * ${gas_price} AS numeric), 2) AS \"Gas Cost ($)\", round(CAST((sum(charging_w) / 3600.0 / 1000.0) * ${electric_rate} AS numeric), 2) AS \"Electric Cost ($)\", round(CAST(((sum(charging_w) / 3600.0 / 1000.0) * ${tesla_efficiency} / ${ice_mpg}) * ${gas_price} - (sum(charging_w) / 3600.0 / 1000.0) * ${electric_rate} AS numeric), 2) AS \"Net Savings ($)\" FROM tesla_readings WHERE is_charging = TRUE AND time > now() - INTERVAL '30 days' GROUP BY 1 ORDER BY 1 DESC",
+          "rawSql": "SELECT time_bucket('1 day', time AT TIME ZONE '${timezone}') AT TIME ZONE '${timezone}' AS \"Day\", round(CAST(sum(charging_w) * 10.0 / 3600.0 / 1000.0 AS numeric), 2) AS \"kWh Charged\", round(CAST((sum(charging_w) * 10.0 / 3600.0 / 1000.0) * ${tesla_efficiency} AS numeric), 1) AS \"Miles Equivalent\", round(CAST(((sum(charging_w) * 10.0 / 3600.0 / 1000.0) * ${tesla_efficiency} / ${ice_mpg}) * ${gas_price} AS numeric), 2) AS \"Gas Cost ($)\", round(CAST((sum(charging_w) * 10.0 / 3600.0 / 1000.0) * ${electric_rate} AS numeric), 2) AS \"Electric Cost ($)\", round(CAST(((sum(charging_w) * 10.0 / 3600.0 / 1000.0) * ${tesla_efficiency} / ${ice_mpg}) * ${gas_price} - (sum(charging_w) * 10.0 / 3600.0 / 1000.0) * ${electric_rate} AS numeric), 2) AS \"Net Savings ($)\" FROM tesla_readings WHERE is_charging = TRUE AND time > now() - INTERVAL '30 days' GROUP BY 1 ORDER BY 1 DESC",
           "refId": "A"
         }
       ],
