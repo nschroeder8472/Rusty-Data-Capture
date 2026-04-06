@@ -192,93 +192,8 @@
     },
     {
       "type": "row",
-      "title": "Solar Offset",
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 },
-      "collapsed": false
-    },
-    {
-      "id": 9,
-      "title": "Solar Offset %",
-      "description": "Percentage of total consumption covered by solar production for the selected time range",
-      "type": "gauge",
-      "datasource": { "type": "postgres", "uid": "timescaledb" },
-      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 6 },
-      "targets": [
-        {
-          "rawSql": "SELECT now() AS time, CASE WHEN avg(house_total_w) > 0 THEN LEAST(avg(solar_w) / avg(house_total_w) * 100, 100) ELSE 0 END AS \"Solar Offset (%)\" FROM enphase_readings WHERE $__timeFilter(time)",
-          "format": "table",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percent",
-          "min": 0,
-          "max": 100,
-          "color": { "mode": "thresholds" },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "value": null, "color": "red" },
-              { "value": 25, "color": "orange" },
-              { "value": 50, "color": "yellow" },
-              { "value": 75, "color": "light-green" },
-              { "value": 100, "color": "green" }
-            ]
-          }
-        }
-      },
-      "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"] },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true
-      }
-    },
-    {
-      "id": 10,
-      "title": "Solar Offset Over Time",
-      "description": "Solar production as a percentage of total consumption over time",
-      "type": "timeseries",
-      "datasource": { "type": "postgres", "uid": "timescaledb" },
-      "gridPos": { "h": 6, "w": 16, "x": 8, "y": 6 },
-      "targets": [
-        {
-          "rawSql": "SELECT time_bucket('${interval}', time) AS time, CASE WHEN avg(house_total_w) > 0 THEN LEAST(avg(solar_w) / avg(house_total_w) * 100, 200) ELSE 0 END AS \"Solar Offset (%)\" FROM enphase_readings WHERE $__timeFilter(time) GROUP BY 1 ORDER BY 1",
-          "format": "time_series",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percent",
-          "custom": {
-            "drawStyle": "line",
-            "lineInterpolation": "smooth",
-            "fillOpacity": 20,
-            "lineWidth": 2,
-            "showPoints": "never",
-            "gradientMode": "scheme",
-            "thresholdsStyle": { "mode": "area" }
-          },
-          "color": { "mode": "continuous-GrYlRd" },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "value": null, "color": "red" },
-              { "value": 100, "color": "green" }
-            ]
-          }
-        }
-      },
-      "options": {
-        "tooltip": { "mode": "single" },
-        "legend": { "displayMode": "list", "placement": "bottom", "calcs": ["mean", "max"] }
-      }
-    },
-    {
-      "type": "row",
       "title": "Power Flow",
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 12 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 },
       "collapsed": false
     },
     {
@@ -286,7 +201,7 @@
       "title": "Real-Time Power Flow",
       "type": "timeseries",
       "datasource": { "type": "postgres", "uid": "timescaledb" },
-      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 13 },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 6 },
       "targets": [
         {
           "rawSql": "SELECT time_bucket('${interval}', time) AS time, avg(solar_w) AS \"Solar\" FROM enphase_readings WHERE $__timeFilter(time) GROUP BY 1 ORDER BY 1",
@@ -343,6 +258,91 @@
       "options": {
         "tooltip": { "mode": "multi", "sort": "desc" },
         "legend": { "displayMode": "list", "placement": "bottom", "calcs": ["lastNotNull", "mean", "max"] }
+      }
+    },
+    {
+      "type": "row",
+      "title": "Solar Offset",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 16 },
+      "collapsed": false
+    },
+    {
+      "id": 9,
+      "title": "Solar Offset %",
+      "description": "Percentage of total consumption covered by solar production for the selected time range",
+      "type": "gauge",
+      "datasource": { "type": "postgres", "uid": "timescaledb" },
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 17 },
+      "targets": [
+        {
+          "rawSql": "SELECT now() AS time, CASE WHEN avg(house_total_w) > 0 THEN LEAST(avg(solar_w) / avg(house_total_w) * 100, 100) ELSE 0 END AS \"Solar Offset (%)\" FROM enphase_readings WHERE $__timeFilter(time)",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": null, "color": "red" },
+              { "value": 25, "color": "orange" },
+              { "value": 50, "color": "yellow" },
+              { "value": 75, "color": "light-green" },
+              { "value": 100, "color": "green" }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      }
+    },
+    {
+      "id": 10,
+      "title": "Solar Offset Over Time",
+      "description": "Solar production as a percentage of total consumption over time",
+      "type": "timeseries",
+      "datasource": { "type": "postgres", "uid": "timescaledb" },
+      "gridPos": { "h": 6, "w": 16, "x": 8, "y": 17 },
+      "targets": [
+        {
+          "rawSql": "SELECT time_bucket('${interval}', time) AS time, CASE WHEN avg(house_total_w) > 0 THEN LEAST(avg(solar_w) / avg(house_total_w) * 100, 200) ELSE 0 END AS \"Solar Offset (%)\" FROM enphase_readings WHERE $__timeFilter(time) GROUP BY 1 ORDER BY 1",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 20,
+            "lineWidth": 2,
+            "showPoints": "never",
+            "gradientMode": "scheme",
+            "thresholdsStyle": { "mode": "area" }
+          },
+          "color": { "mode": "continuous-GrYlRd" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": null, "color": "red" },
+              { "value": 100, "color": "green" }
+            ]
+          }
+        }
+      },
+      "options": {
+        "tooltip": { "mode": "single" },
+        "legend": { "displayMode": "list", "placement": "bottom", "calcs": ["mean", "max"] }
       }
     },
     {
