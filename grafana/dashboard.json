@@ -292,6 +292,7 @@
         "defaults": {
           "unit": "percent",
           "min": 0,
+          "max": 500,
           "color": { "mode": "thresholds" },
           "thresholds": {
             "mode": "absolute",
@@ -300,7 +301,9 @@
               { "value": 25, "color": "orange" },
               { "value": 50, "color": "yellow" },
               { "value": 75, "color": "light-green" },
-              { "value": 100, "color": "green" }
+              { "value": 100, "color": "green" },
+              { "value": 200, "color": "blue" },
+              { "value": 300, "color": "purple" }
             ]
           }
         }
