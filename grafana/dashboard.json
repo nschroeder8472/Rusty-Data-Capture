@@ -512,7 +512,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT now() AS time, CASE WHEN avg(house_total_w) > 0 THEN (sum(solar_w) - sum(house_total_w)) / sum(house_total_w) * 100 ELSE 0 END AS \"Solar Offset (%)\" FROM enphase_readings WHERE $__timeFilter(time)",
+          "rawSql": "SELECT now() AS time, CASE WHEN (sum(solar_w) + sum(grid_net_w)) > 0 THEN sum(solar_w) / (sum(solar_w) + sum(grid_net_w)) * 100 ELSE 0 END AS \"Solar Offset (%)\" FROM enphase_readings WHERE $__timeFilter(time)",
           "refId": "A",
           "sql": {
             "columns": [
@@ -626,7 +626,7 @@
       "targets": [
         {
           "format": "time_series",
-          "rawSql": "SELECT time_bucket('${interval}', time) AS time, CASE WHEN avg(house_total_w) > 0 THEN (sum(solar_w) - sum(house_total_w)) / sum(house_total_w) * 100 ELSE 0 END AS \"Solar Offset (%)\" FROM enphase_readings WHERE $__timeFilter(time) GROUP BY 1 ORDER BY 1",
+          "rawSql": "SELECT time_bucket('${interval}', time) AS time, CASE WHEN (sum(solar_w) + sum(grid_net_w)) > 0 THEN sum(solar_w) / (sum(solar_w) + sum(grid_net_w)) * 100 ELSE 0 END AS \"Solar Offset (%)\" FROM enphase_readings WHERE $__timeFilter(time) GROUP BY 1 ORDER BY 1",
           "refId": "A"
         }
       ],
