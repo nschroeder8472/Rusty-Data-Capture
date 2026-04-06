@@ -262,8 +262,93 @@
     },
     {
       "type": "row",
-      "title": "Net Solar Balance",
+      "title": "Solar Offset",
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 16 },
+      "collapsed": false
+    },
+    {
+      "id": 9,
+      "title": "Solar Offset %",
+      "description": "Percentage of total consumption covered by solar production for the selected time range",
+      "type": "gauge",
+      "datasource": { "type": "postgres", "uid": "timescaledb" },
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 17 },
+      "targets": [
+        {
+          "rawSql": "SELECT now() AS time, CASE WHEN avg(house_total_w) > 0 THEN LEAST(avg(solar_w) / avg(house_total_w) * 100, 100) ELSE 0 END AS \"Solar Offset (%)\" FROM enphase_readings WHERE $__timeFilter(time)",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": null, "color": "red" },
+              { "value": 25, "color": "orange" },
+              { "value": 50, "color": "yellow" },
+              { "value": 75, "color": "light-green" },
+              { "value": 100, "color": "green" }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      }
+    },
+    {
+      "id": 10,
+      "title": "Solar Offset Over Time",
+      "description": "Solar production as a percentage of total consumption over time",
+      "type": "timeseries",
+      "datasource": { "type": "postgres", "uid": "timescaledb" },
+      "gridPos": { "h": 6, "w": 16, "x": 8, "y": 17 },
+      "targets": [
+        {
+          "rawSql": "SELECT time_bucket('${interval}', time) AS time, CASE WHEN avg(house_total_w) > 0 THEN LEAST(avg(solar_w) / avg(house_total_w) * 100, 200) ELSE 0 END AS \"Solar Offset (%)\" FROM enphase_readings WHERE $__timeFilter(time) GROUP BY 1 ORDER BY 1",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 20,
+            "lineWidth": 2,
+            "showPoints": "never",
+            "gradientMode": "scheme",
+            "thresholdsStyle": { "mode": "area" }
+          },
+          "color": { "mode": "continuous-GrYlRd" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": null, "color": "red" },
+              { "value": 100, "color": "green" }
+            ]
+          }
+        }
+      },
+      "options": {
+        "tooltip": { "mode": "single" },
+        "legend": { "displayMode": "list", "placement": "bottom", "calcs": ["mean", "max"] }
+      }
+    },
+    {
+      "type": "row",
+      "title": "Net Solar Balance",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 23 },
       "collapsed": false
     },
     {
@@ -272,7 +357,7 @@
       "description": "Positive = exporting to grid, Negative = importing from grid",
       "type": "timeseries",
       "datasource": { "type": "postgres", "uid": "timescaledb" },
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 17 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
       "targets": [
         {
           "rawSql": "SELECT time_bucket('${interval}', time) AS time, avg(solar_w) - avg(house_total_w) AS \"Net Solar vs Total\" FROM enphase_readings WHERE $__timeFilter(time) GROUP BY 1 ORDER BY 1",
@@ -313,7 +398,7 @@
       "description": "Positive = surplus solar after house, Negative = house deficit",
       "type": "timeseries",
       "datasource": { "type": "postgres", "uid": "timescaledb" },
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 17 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
       "targets": [
         {
           "rawSql": "SELECT time_bucket('${interval}', e.time) AS time, avg(e.solar_w) - (avg(e.house_total_w) - COALESCE(avg(t.charging_w), 0)) AS \"Net Solar vs House Only\" FROM enphase_readings e LEFT JOIN tesla_readings t ON time_bucket('${interval}', e.time) = time_bucket('${interval}', t.time) WHERE $__timeFilter(e.time) GROUP BY 1 ORDER BY 1",
@@ -351,7 +436,7 @@
     {
       "type": "row",
       "title": "Cost Savings",
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 25 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 32 },
       "collapsed": false
     },
     {
@@ -359,7 +444,7 @@
       "title": "Daily Solar Savings (30 days)",
       "type": "barchart",
       "datasource": { "type": "postgres", "uid": "timescaledb" },
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 26 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 33 },
       "targets": [
         {
           "rawSql": "SELECT time_bucket('1 day', time) AS time, (sum(solar_w) / 3600.0) * ${electric_rate} / 1000.0 AS \"Solar Savings ($)\" FROM enphase_readings WHERE time > now() - INTERVAL '30 days' GROUP BY 1 ORDER BY 1",
@@ -385,7 +470,7 @@
       "title": "Tesla Fuel Savings (30 days)",
       "type": "table",
       "datasource": { "type": "postgres", "uid": "timescaledb" },
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 26 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 33 },
       "targets": [
         {
           "rawSql": "SELECT time_bucket('1 day', time) AS \"Day\", round(CAST(sum(charging_w) / 3600.0 / 1000.0 AS numeric), 2) AS \"kWh Charged\", round(CAST((sum(charging_w) / 3600.0 / 1000.0) * ${tesla_efficiency} AS numeric), 1) AS \"Miles Equivalent\", round(CAST(((sum(charging_w) / 3600.0 / 1000.0) * ${tesla_efficiency} / ${ice_mpg}) * ${gas_price} AS numeric), 2) AS \"Gas Cost ($)\", round(CAST((sum(charging_w) / 3600.0 / 1000.0) * ${electric_rate} AS numeric), 2) AS \"Electric Cost ($)\", round(CAST(((sum(charging_w) / 3600.0 / 1000.0) * ${tesla_efficiency} / ${ice_mpg}) * ${gas_price} - (sum(charging_w) / 3600.0 / 1000.0) * ${electric_rate} AS numeric), 2) AS \"Net Savings ($)\" FROM tesla_readings WHERE is_charging = TRUE AND time > now() - INTERVAL '30 days' GROUP BY 1 ORDER BY 1 DESC",

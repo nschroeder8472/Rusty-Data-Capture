@@ -35,6 +35,46 @@ impl MeterSection {
             + self.ph_b.as_ref().map_or(0.0, |ph| ph.p)
             + self.ph_c.as_ref().map_or(0.0, |ph| ph.p)
     }
+
+    /// Sum reactive power (q) across all available phases.
+    pub fn total_q(&self) -> f64 {
+        self.ph_a.q
+            + self.ph_b.as_ref().map_or(0.0, |ph| ph.q)
+            + self.ph_c.as_ref().map_or(0.0, |ph| ph.q)
+    }
+
+    /// Sum apparent power (s) across all available phases.
+    pub fn total_s(&self) -> f64 {
+        self.ph_a.s
+            + self.ph_b.as_ref().map_or(0.0, |ph| ph.s)
+            + self.ph_c.as_ref().map_or(0.0, |ph| ph.s)
+    }
+
+    /// Sum current (i) across all available phases.
+    pub fn total_i(&self) -> f64 {
+        self.ph_a.i
+            + self.ph_b.as_ref().map_or(0.0, |ph| ph.i)
+            + self.ph_c.as_ref().map_or(0.0, |ph| ph.i)
+    }
+
+    /// Average power factor across active phases.
+    pub fn avg_pf(&self) -> f64 {
+        let mut sum = self.ph_a.pf;
+        let mut count = 1.0;
+        if let Some(ph) = &self.ph_b {
+            if ph.p.abs() > 0.0 {
+                sum += ph.pf;
+                count += 1.0;
+            }
+        }
+        if let Some(ph) = &self.ph_c {
+            if ph.p.abs() > 0.0 {
+                sum += ph.pf;
+                count += 1.0;
+            }
+        }
+        sum / count
+    }
 }
 
 #[derive(Debug, Deserialize)]
@@ -108,8 +148,17 @@ async fn stream_loop(config: &Config, state: &Arc<Mutex<SharedState>>) -> Result
                     shared.enphase.solar_w = payload.production.total_p();
                     shared.enphase.solar_voltage = payload.production.ph_a.v;
                     shared.enphase.solar_frequency = payload.production.ph_a.f;
+                    shared.enphase.solar_q = payload.production.total_q();
+                    shared.enphase.solar_s = payload.production.total_s();
+                    shared.enphase.solar_i = payload.production.total_i();
+                    shared.enphase.solar_pf = payload.production.avg_pf();
                     shared.enphase.house_total_w = payload.total_consumption.total_p();
+                    shared.enphase.house_q = payload.total_consumption.total_q();
+                    shared.enphase.house_s = payload.total_consumption.total_s();
+                    shared.enphase.house_i = payload.total_consumption.total_i();
                     shared.enphase.grid_net_w = payload.net_consumption.total_p();
+                    shared.enphase.grid_q = payload.net_consumption.total_q();
+                    shared.enphase.grid_s = payload.net_consumption.total_s();
                     shared.enphase.timestamp = Some(Utc::now());
                 }
                 Err(e) => {

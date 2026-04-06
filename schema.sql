@@ -9,8 +9,17 @@ CREATE TABLE IF NOT EXISTS enphase_readings (
     solar_w          DOUBLE PRECISION,
     solar_voltage    DOUBLE PRECISION,
     solar_frequency  DOUBLE PRECISION,
+    solar_q          DOUBLE PRECISION,   -- reactive power (VAR)
+    solar_s          DOUBLE PRECISION,   -- apparent power (VA)
+    solar_i          DOUBLE PRECISION,   -- current (A)
+    solar_pf         DOUBLE PRECISION,   -- power factor
     house_total_w    DOUBLE PRECISION,
-    grid_net_w       DOUBLE PRECISION   -- negative = exporting
+    house_q          DOUBLE PRECISION,   -- reactive power (VAR)
+    house_s          DOUBLE PRECISION,   -- apparent power (VA)
+    house_i          DOUBLE PRECISION,   -- current (A)
+    grid_net_w       DOUBLE PRECISION,   -- negative = exporting
+    grid_q           DOUBLE PRECISION,   -- reactive power (VAR)
+    grid_s           DOUBLE PRECISION    -- apparent power (VA)
 );
 
 SELECT create_hypertable('enphase_readings', 'time', if_not_exists => TRUE);
@@ -22,7 +31,12 @@ CREATE TABLE IF NOT EXISTS tesla_readings (
     session_wh          DOUBLE PRECISION,
     lifetime_kwh        DOUBLE PRECISION,
     vehicle_connected   BOOLEAN,
-    is_charging         BOOLEAN
+    is_charging         BOOLEAN,
+    session_s           DOUBLE PRECISION,   -- session duration (seconds)
+    grid_v              DOUBLE PRECISION,   -- grid voltage
+    grid_hz             DOUBLE PRECISION,   -- grid frequency
+    vehicle_current_a   DOUBLE PRECISION,   -- total vehicle current (A)
+    evse_state          INTEGER             -- EVSE state code
 );
 
 SELECT create_hypertable('tesla_readings', 'time', if_not_exists => TRUE);

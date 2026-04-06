@@ -21,6 +21,16 @@ pub struct TeslaVitals {
     pub current_a_a: f64,
     #[serde(rename = "currentB_a")]
     pub current_b_a: f64,
+    #[serde(default)]
+    pub session_s: f64,
+    #[serde(default)]
+    pub grid_v: f64,
+    #[serde(default)]
+    pub grid_hz: f64,
+    #[serde(default)]
+    pub vehicle_current_a: f64,
+    #[serde(default)]
+    pub evse_state: i32,
 }
 
 impl TeslaVitals {
@@ -76,6 +86,11 @@ async fn poll_tesla(
     shared.tesla.lifetime_kwh = lifetime_kwh;
     shared.tesla.vehicle_connected = vitals.vehicle_connected;
     shared.tesla.is_charging = vitals.contactor_closed;
+    shared.tesla.session_s = vitals.session_s;
+    shared.tesla.grid_v = vitals.grid_v;
+    shared.tesla.grid_hz = vitals.grid_hz;
+    shared.tesla.vehicle_current_a = vitals.vehicle_current_a;
+    shared.tesla.evse_state = vitals.evse_state;
     shared.tesla.timestamp = Some(Utc::now());
 
     Ok(())
@@ -126,6 +141,11 @@ mod tests {
             voltage_b_v: 120.3,
             current_a_a: 0.0,
             current_b_a: 0.0,
+            session_s: 0.0,
+            grid_v: 240.5,
+            grid_hz: 60.0,
+            vehicle_current_a: 0.0,
+            evse_state: 0,
         };
         assert_eq!(vitals.charging_power_w(), 0.0);
     }

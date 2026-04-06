@@ -30,8 +30,17 @@ pub async fn ensure_schema(pool: &Pool) -> Result<()> {
                 solar_w          DOUBLE PRECISION,
                 solar_voltage    DOUBLE PRECISION,
                 solar_frequency  DOUBLE PRECISION,
+                solar_q          DOUBLE PRECISION,
+                solar_s          DOUBLE PRECISION,
+                solar_i          DOUBLE PRECISION,
+                solar_pf         DOUBLE PRECISION,
                 house_total_w    DOUBLE PRECISION,
-                grid_net_w       DOUBLE PRECISION
+                house_q          DOUBLE PRECISION,
+                house_s          DOUBLE PRECISION,
+                house_i          DOUBLE PRECISION,
+                grid_net_w       DOUBLE PRECISION,
+                grid_q           DOUBLE PRECISION,
+                grid_s           DOUBLE PRECISION
             );
 
             SELECT create_hypertable('enphase_readings', 'time', if_not_exists => TRUE);
@@ -42,7 +51,12 @@ pub async fn ensure_schema(pool: &Pool) -> Result<()> {
                 session_wh          DOUBLE PRECISION,
                 lifetime_kwh        DOUBLE PRECISION,
                 vehicle_connected   BOOLEAN,
-                is_charging         BOOLEAN
+                is_charging         BOOLEAN,
+                session_s           DOUBLE PRECISION,
+                grid_v              DOUBLE PRECISION,
+                grid_hz             DOUBLE PRECISION,
+                vehicle_current_a   DOUBLE PRECISION,
+                evse_state          INTEGER
             );
 
             SELECT create_hypertable('tesla_readings', 'time', if_not_exists => TRUE);
@@ -141,15 +155,27 @@ pub async fn insert_enphase_reading(
     client
         .execute(
             "INSERT INTO enphase_readings (
-                time, solar_w, solar_voltage, solar_frequency, house_total_w, grid_net_w
-            ) VALUES ($1, $2, $3, $4, $5, $6)",
+                time, solar_w, solar_voltage, solar_frequency,
+                solar_q, solar_s, solar_i, solar_pf,
+                house_total_w, house_q, house_s, house_i,
+                grid_net_w, grid_q, grid_s
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)",
             &[
                 &time,
                 &reading.solar_w,
                 &reading.solar_voltage,
                 &reading.solar_frequency,
+                &reading.solar_q,
+                &reading.solar_s,
+                &reading.solar_i,
+                &reading.solar_pf,
                 &reading.house_total_w,
+                &reading.house_q,
+                &reading.house_s,
+                &reading.house_i,
                 &reading.grid_net_w,
+                &reading.grid_q,
+                &reading.grid_s,
             ],
         )
         .await
@@ -168,8 +194,9 @@ pub async fn insert_tesla_reading(
     client
         .execute(
             "INSERT INTO tesla_readings (
-                time, charging_w, session_wh, lifetime_kwh, vehicle_connected, is_charging
-            ) VALUES ($1, $2, $3, $4, $5, $6)",
+                time, charging_w, session_wh, lifetime_kwh, vehicle_connected, is_charging,
+                session_s, grid_v, grid_hz, vehicle_current_a, evse_state
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)",
             &[
                 &time,
                 &reading.tesla_w,
@@ -177,6 +204,11 @@ pub async fn insert_tesla_reading(
                 &reading.lifetime_kwh,
                 &reading.vehicle_connected,
                 &reading.is_charging,
+                &reading.session_s,
+                &reading.grid_v,
+                &reading.grid_hz,
+                &reading.vehicle_current_a,
+                &reading.evse_state,
             ],
         )
         .await
