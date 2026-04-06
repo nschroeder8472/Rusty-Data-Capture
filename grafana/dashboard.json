@@ -275,7 +275,7 @@
       "gridPos": { "h": 6, "w": 8, "x": 0, "y": 17 },
       "targets": [
         {
-          "rawSql": "SELECT now() AS time, CASE WHEN avg(house_total_w) > 0 THEN LEAST(avg(solar_w) / avg(house_total_w) * 100, 100) ELSE 0 END AS \"Solar Offset (%)\" FROM enphase_readings WHERE $__timeFilter(time)",
+          "rawSql": "SELECT now() AS time, CASE WHEN avg(house_total_w) > 0 THEN avg(solar_w) / avg(house_total_w) * 100 ELSE 0 END AS \"Solar Offset (%)\" FROM enphase_readings WHERE $__timeFilter(time)",
           "format": "table",
           "refId": "A"
         }
@@ -284,7 +284,6 @@
         "defaults": {
           "unit": "percent",
           "min": 0,
-          "max": 100,
           "color": { "mode": "thresholds" },
           "thresholds": {
             "mode": "absolute",
