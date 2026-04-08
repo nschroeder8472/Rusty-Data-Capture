@@ -8,7 +8,7 @@ datasources:
     user: solar
     database: solar
     secureJsonData:
-      password: $DB_PASSWORD
+      password: $__env{DB_PASSWORD}
     jsonData:
       sslmode: disable
       maxOpenConns: 5
