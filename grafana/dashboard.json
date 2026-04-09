@@ -486,7 +486,7 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 8,
+        "w": 6,
         "x": 0,
         "y": 17
       },
@@ -535,6 +535,105 @@
       ],
       "title": "Solar Offset %",
       "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "timescaledb"
+      },
+      "description": "Solar production vs total consumption for the selected time range",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#00d2ff"
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "kwatth"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Produced"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#00d2ff",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Consumed"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 17
+      },
+      "id": 16,
+      "options": {
+        "displayMode": "basic",
+        "maxVizHeight": 300,
+        "minVizHeight": 16,
+        "minVizWidth": 8,
+        "namePlacement": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color"
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "format": "table",
+          "rawSql": "SELECT now() AS time, round(CAST(sum(solar_w) * 10.0 / 3600.0 / 1000.0 AS numeric), 1) AS \"Produced\" FROM enphase_readings WHERE $__timeFilter(time)",
+          "refId": "A"
+        },
+        {
+          "format": "table",
+          "rawSql": "SELECT now() AS time, round(CAST(sum(house_total_w) * 10.0 / 3600.0 / 1000.0 AS numeric), 1) AS \"Consumed\" FROM enphase_readings WHERE $__timeFilter(time)",
+          "refId": "B"
+        }
+      ],
+      "title": "Energy Balance",
+      "type": "bargauge"
     },
     {
       "datasource": {
@@ -601,8 +700,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 16,
-        "x": 8,
+        "w": 12,
+        "x": 12,
         "y": 17
       },
       "id": 10,
