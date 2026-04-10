@@ -63,7 +63,17 @@ pub async fn ensure_schema(pool: &Pool) -> Result<()> {
 
             CREATE INDEX IF NOT EXISTS idx_enphase_time_desc ON enphase_readings (time DESC);
             CREATE INDEX IF NOT EXISTS idx_tesla_time_desc ON tesla_readings (time DESC);
-            CREATE INDEX IF NOT EXISTS idx_tesla_charging ON tesla_readings (time DESC) WHERE is_charging = TRUE;",
+            CREATE INDEX IF NOT EXISTS idx_tesla_charging ON tesla_readings (time DESC) WHERE is_charging = TRUE;
+
+            CREATE TABLE IF NOT EXISTS gas_prices (
+                period           DATE             NOT NULL,
+                area_name        TEXT             NOT NULL,
+                product_name     TEXT             NOT NULL,
+                price_per_gallon DOUBLE PRECISION NOT NULL,
+                PRIMARY KEY (period, area_name, product_name)
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_gas_prices_period_desc ON gas_prices (period DESC);",
         )
         .await
         .context("Failed to ensure database schema")?;
@@ -221,6 +231,8 @@ pub async fn run_writer(
     pool: Pool,
     state: Arc<Mutex<SharedState>>,
     write_interval_secs: u64,
+    write_enphase: bool,
+    write_tesla: bool,
 ) {
     let interval = tokio::time::Duration::from_secs(write_interval_secs);
 
@@ -236,13 +248,13 @@ pub async fn run_writer(
             (shared.enphase.clone(), shared.tesla.clone())
         };
 
-        if enphase.timestamp.is_some() {
+        if write_enphase && enphase.timestamp.is_some() {
             if let Err(e) = insert_enphase_reading(&pool, &enphase, now).await {
                 warn!("Enphase write error: {e:#}");
             }
         }
 
-        if tesla.timestamp.is_some() {
+        if write_tesla && tesla.timestamp.is_some() {
             if let Err(e) = insert_tesla_reading(&pool, &tesla, now).await {
                 warn!("Tesla write error: {e:#}");
             }

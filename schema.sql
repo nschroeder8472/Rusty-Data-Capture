@@ -41,6 +41,17 @@ CREATE TABLE IF NOT EXISTS tesla_readings (
 
 SELECT create_hypertable('tesla_readings', 'time', if_not_exists => TRUE);
 
+-- Gasoline price data (weekly from EIA)
+CREATE TABLE IF NOT EXISTS gas_prices (
+    period           DATE             NOT NULL,
+    area_name        TEXT             NOT NULL,
+    product_name     TEXT             NOT NULL,
+    price_per_gallon DOUBLE PRECISION NOT NULL,
+    PRIMARY KEY (period, area_name, product_name)
+);
+
+CREATE INDEX IF NOT EXISTS idx_gas_prices_period_desc ON gas_prices (period DESC);
+
 -- Indexes for common queries
 CREATE INDEX IF NOT EXISTS idx_enphase_time_desc ON enphase_readings (time DESC);
 CREATE INDEX IF NOT EXISTS idx_tesla_time_desc ON tesla_readings (time DESC);

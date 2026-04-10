@@ -6,7 +6,7 @@ use futures::StreamExt;
 use serde::Deserialize;
 use tracing::{info, warn};
 
-use crate::config::Config;
+use crate::config::EnphaseConfig;
 use crate::metrics::SharedState;
 
 #[derive(Debug, Deserialize)]
@@ -93,7 +93,7 @@ pub fn parse_sse_event(data: &str) -> Result<SsePayload, serde_json::Error> {
     serde_json::from_str(data)
 }
 
-pub async fn run_enphase_stream(config: Config, state: Arc<Mutex<SharedState>>) {
+pub async fn run_enphase_stream(config: EnphaseConfig, state: Arc<Mutex<SharedState>>) {
     loop {
         if let Err(e) = stream_loop(&config, &state).await {
             warn!("Enphase stream error: {e:#}");
@@ -103,8 +103,8 @@ pub async fn run_enphase_stream(config: Config, state: Arc<Mutex<SharedState>>) 
     }
 }
 
-async fn stream_loop(config: &Config, state: &Arc<Mutex<SharedState>>) -> Result<()> {
-    let url = format!("https://{}/stream/meter", config.envoy_host);
+async fn stream_loop(config: &EnphaseConfig, state: &Arc<Mutex<SharedState>>) -> Result<()> {
+    let url = format!("https://{}/stream/meter", config.host);
 
     let client = reqwest::Client::builder()
         .tls_danger_accept_invalid_certs(true)
@@ -112,7 +112,7 @@ async fn stream_loop(config: &Config, state: &Arc<Mutex<SharedState>>) -> Result
 
     let response = client
         .get(&url)
-        .bearer_auth(&config.envoy_token)
+        .bearer_auth(&config.token)
         .send()
         .await?
         .error_for_status()?;

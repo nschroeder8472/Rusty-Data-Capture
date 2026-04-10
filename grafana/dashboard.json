@@ -1029,11 +1029,11 @@
       "targets": [
         {
           "format": "time_series",
-          "rawSql": "SELECT time_bucket('1 day', time AT TIME ZONE '${timezone}') AT TIME ZONE '${timezone}' AS time, (sum(solar_w) * 10.0 / 3600.0) * ${electric_rate} / 1000.0 AS \"Solar Savings ($)\" FROM enphase_readings WHERE time > now() - INTERVAL '30 days' GROUP BY 1 ORDER BY 1",
+          "rawSql": "SELECT time_bucket('1 day', time AT TIME ZONE '${timezone}') AT TIME ZONE '${timezone}' AS time, (sum(solar_w) * 10.0 / 3600.0) * ${electric_rate} / 1000.0 AS \"Solar Savings ($)\" FROM enphase_readings WHERE $__timeFilter(time) GROUP BY 1 ORDER BY 1",
           "refId": "A"
         }
       ],
-      "title": "Daily Solar Savings (30 days)",
+      "title": "Daily Solar Savings",
       "type": "barchart"
     },
     {
@@ -1166,11 +1166,11 @@
       "targets": [
         {
           "format": "table",
-          "rawSql": "SELECT time_bucket('1 day', time AT TIME ZONE '${timezone}') AT TIME ZONE '${timezone}' AS \"Day\", round(CAST(sum(charging_w) * 10.0 / 3600.0 / 1000.0 AS numeric), 2) AS \"kWh Charged\", round(CAST((sum(charging_w) * 10.0 / 3600.0 / 1000.0) * ${tesla_efficiency} AS numeric), 1) AS \"Miles Equivalent\", round(CAST(((sum(charging_w) * 10.0 / 3600.0 / 1000.0) * ${tesla_efficiency} / ${ice_mpg}) * ${gas_price} AS numeric), 2) AS \"Gas Cost ($)\", round(CAST((sum(charging_w) * 10.0 / 3600.0 / 1000.0) * ${electric_rate} AS numeric), 2) AS \"Electric Cost ($)\", round(CAST(((sum(charging_w) * 10.0 / 3600.0 / 1000.0) * ${tesla_efficiency} / ${ice_mpg}) * ${gas_price} - (sum(charging_w) * 10.0 / 3600.0 / 1000.0) * ${electric_rate} AS numeric), 2) AS \"Net Savings ($)\" FROM tesla_readings WHERE is_charging = TRUE AND time > now() - INTERVAL '30 days' GROUP BY 1 ORDER BY 1 DESC",
+          "rawSql": "WITH daily_charging AS ( SELECT time_bucket('1 day', time AT TIME ZONE '${timezone}') AT TIME ZONE '${timezone}' AS day, sum(charging_w) * 10.0 / 3600.0 / 1000.0 AS kwh FROM tesla_readings WHERE is_charging = TRUE AND $__timeFilter(time) GROUP BY 1 ), daily_gas AS ( SELECT dc.day, dc.kwh, COALESCE( (SELECT g.price_per_gallon FROM gas_prices g WHERE g.period <= dc.day::date ORDER BY g.period DESC LIMIT 1), ${gas_price} ) AS gp FROM daily_charging dc ) SELECT day AS \"Day\", round(CAST(kwh AS numeric), 2) AS \"kWh Charged\", round(CAST(kwh * ${tesla_efficiency} AS numeric), 1) AS \"Miles Equivalent\", round(CAST(gp AS numeric), 2) AS \"Gas Price ($/gal)\", round(CAST((kwh * ${tesla_efficiency} / ${ice_mpg}) * gp AS numeric), 2) AS \"Gas Cost ($)\", round(CAST(kwh * ${electric_rate} AS numeric), 2) AS \"Electric Cost ($)\", round(CAST((kwh * ${tesla_efficiency} / ${ice_mpg}) * gp - kwh * ${electric_rate} AS numeric), 2) AS \"Net Savings ($)\" FROM daily_gas ORDER BY day DESC",
           "refId": "A"
         }
       ],
-      "title": "Tesla Fuel Savings (30 days)",
+      "title": "Tesla Fuel Savings",
       "type": "table"
     },
     {
@@ -1183,7 +1183,7 @@
       },
       "id": 16,
       "panels": [],
-      "title": "Energy Bill Estimate",
+      "title": "Electricity Cost",
       "type": "row"
     },
     {
@@ -1191,7 +1191,7 @@
         "type": "postgres",
         "uid": "timescaledb"
       },
-      "description": "Estimated 30-day electricity bill based on grid imports (energy drawn from the grid) at the configured electric rate.",
+      "description": "Electricity cost from grid imports for the selected time range at the configured electric rate.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1247,11 +1247,11 @@
       "targets": [
         {
           "format": "table",
-          "rawSql": "SELECT now() AS time, round(CAST(sum(GREATEST(grid_net_w, 0)) * 10.0 / 3600.0 / 1000.0 * ${electric_rate} AS numeric), 2) AS \"Est. Monthly Bill ($)\" FROM enphase_readings WHERE time > now() - INTERVAL '30 days'",
+          "rawSql": "SELECT now() AS time, round(CAST(sum(GREATEST(grid_net_w, 0)) * 10.0 / 3600.0 / 1000.0 * ${electric_rate} AS numeric), 2) AS \"Grid Cost ($)\" FROM enphase_readings WHERE $__timeFilter(time)",
           "refId": "A"
         }
       ],
-      "title": "Est. Monthly Bill (With Solar)",
+      "title": "Grid Cost (With Solar)",
       "type": "stat"
     },
     {
@@ -1259,7 +1259,7 @@
         "type": "postgres",
         "uid": "timescaledb"
       },
-      "description": "What your 30-day electricity bill would be without solar, based on total house consumption at the configured electric rate.",
+      "description": "What your electricity cost would be without solar, based on total house consumption at the configured electric rate.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1315,11 +1315,11 @@
       "targets": [
         {
           "format": "table",
-          "rawSql": "SELECT now() AS time, round(CAST(sum(house_total_w) * 10.0 / 3600.0 / 1000.0 * ${electric_rate} AS numeric), 2) AS \"Without Solar ($)\" FROM enphase_readings WHERE time > now() - INTERVAL '30 days'",
+          "rawSql": "SELECT now() AS time, round(CAST(sum(house_total_w) * 10.0 / 3600.0 / 1000.0 * ${electric_rate} AS numeric), 2) AS \"Without Solar ($)\" FROM enphase_readings WHERE $__timeFilter(time)",
           "refId": "A"
         }
       ],
-      "title": "Est. Monthly Bill (Without Solar)",
+      "title": "Cost Without Solar",
       "type": "stat"
     },
     {
@@ -1327,7 +1327,7 @@
         "type": "postgres",
         "uid": "timescaledb"
       },
-      "description": "Money saved on your electricity bill over the last 30 days thanks to solar generation offsetting grid imports.",
+      "description": "Money saved on electricity for the selected time range thanks to solar generation offsetting grid imports.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1379,12 +1379,187 @@
       "targets": [
         {
           "format": "table",
-          "rawSql": "SELECT now() AS time, round(CAST((sum(house_total_w) - sum(GREATEST(grid_net_w, 0))) * 10.0 / 3600.0 / 1000.0 * ${electric_rate} AS numeric), 2) AS \"Solar Savings ($)\" FROM enphase_readings WHERE time > now() - INTERVAL '30 days'",
+          "rawSql": "SELECT now() AS time, round(CAST((sum(house_total_w) - sum(GREATEST(grid_net_w, 0))) * 10.0 / 3600.0 / 1000.0 * ${electric_rate} AS numeric), 2) AS \"Solar Savings ($)\" FROM enphase_readings WHERE $__timeFilter(time)",
           "refId": "A"
         }
       ],
-      "title": "Monthly Solar Savings",
+      "title": "Solar Savings",
       "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 46
+      },
+      "id": 20,
+      "panels": [],
+      "title": "Gasoline Prices",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "timescaledb"
+      },
+      "description": "Weekly U.S. average regular gasoline retail price from EIA",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "yellow",
+                "value": 3.5
+              },
+              {
+                "color": "red",
+                "value": 5.0
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 0,
+        "y": 47
+      },
+      "id": 21,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": true,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "format": "table",
+          "rawSql": "SELECT period AS time, price_per_gallon AS \"Gas Price ($/gal)\" FROM gas_prices ORDER BY period DESC LIMIT 1",
+          "refId": "A"
+        }
+      ],
+      "title": "Current Gas Price",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "timescaledb"
+      },
+      "description": "Weekly U.S. average regular gasoline price trend from EIA",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "orange",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "$/gal",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 15,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 16,
+        "x": 8,
+        "y": 47
+      },
+      "id": 22,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "format": "time_series",
+          "rawSql": "SELECT period AS time, price_per_gallon AS \"Regular Gasoline ($/gal)\" FROM gas_prices ORDER BY period ASC",
+          "refId": "A"
+        }
+      ],
+      "title": "Gas Price Trend",
+      "type": "timeseries"
     }
   ],
   "preload": false,
@@ -1432,17 +1607,16 @@
           "text": "4.00",
           "value": "4.00"
         },
+        "datasource": {
+          "type": "postgres",
+          "uid": "timescaledb"
+        },
+        "definition": "SELECT COALESCE((SELECT price_per_gallon::text FROM gas_prices ORDER BY period DESC LIMIT 1), '4.00')",
         "label": "Gas Price ($/gal)",
         "name": "gas_price",
-        "options": [
-          {
-            "selected": true,
-            "text": "4.00",
-            "value": "4.00"
-          }
-        ],
-        "query": "4.00",
-        "type": "textbox"
+        "query": "SELECT COALESCE((SELECT price_per_gallon::text FROM gas_prices ORDER BY period DESC LIMIT 1), '4.00')",
+        "refresh": 2,
+        "type": "query"
       },
       {
         "current": {

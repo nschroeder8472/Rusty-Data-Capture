@@ -5,7 +5,7 @@ use chrono::Utc;
 use serde::Deserialize;
 use tracing::{info, warn};
 
-use crate::config::Config;
+use crate::config::TeslaConfig;
 use crate::metrics::SharedState;
 
 #[derive(Debug, Deserialize)]
@@ -39,13 +39,13 @@ impl TeslaVitals {
     }
 }
 
-pub async fn run_tesla_poller(config: Config, state: Arc<Mutex<SharedState>>) {
+pub async fn run_tesla_poller(config: TeslaConfig, state: Arc<Mutex<SharedState>>) {
     let client = reqwest::Client::new();
-    let vitals_url = format!("http://{}/api/1/vitals", config.tesla_host);
-    let lifetime_url = format!("http://{}/api/1/lifetime", config.tesla_host);
-    let interval = tokio::time::Duration::from_secs(config.tesla_poll_interval_secs);
+    let vitals_url = format!("http://{}/api/1/vitals", config.host);
+    let lifetime_url = format!("http://{}/api/1/lifetime", config.host);
+    let interval = tokio::time::Duration::from_secs(config.poll_interval_secs);
 
-    info!("Tesla poller started (every {}s)", config.tesla_poll_interval_secs);
+    info!("Tesla poller started (every {}s)", config.poll_interval_secs);
 
     loop {
         match poll_tesla(&client, &vitals_url, &lifetime_url, &state).await {

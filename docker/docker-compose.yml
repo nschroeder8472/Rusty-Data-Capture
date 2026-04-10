@@ -39,10 +39,12 @@ services:
       dockerfile: docker/Dockerfile
     restart: unless-stopped
     environment:
-      ENVOY_HOST: ${ENVOY_HOST}
-      ENVOY_TOKEN: ${ENVOY_TOKEN}
-      TESLA_HOST: ${TESLA_HOST}
+      ENVOY_HOST: ${ENVOY_HOST:-}
+      ENVOY_TOKEN: ${ENVOY_TOKEN:-}
+      TESLA_HOST: ${TESLA_HOST:-}
       TESLA_POLL_INTERVAL_SECS: ${TESLA_POLL_INTERVAL_SECS:-10}
+      EIA_API_KEY: ${EIA_API_KEY:-}
+      GAS_PRICE_POLL_INTERVAL_SECS: ${GAS_PRICE_POLL_INTERVAL_SECS:-86400}
       DATABASE_URL: postgresql://solar:${DB_PASSWORD}@timescaledb:5432/solar
       DB_POOL_SIZE: ${DB_POOL_SIZE:-5}
       WRITE_INTERVAL_SECS: ${WRITE_INTERVAL_SECS:-10}
