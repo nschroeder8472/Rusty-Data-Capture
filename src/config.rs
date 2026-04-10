@@ -17,6 +17,7 @@ pub struct TeslaConfig {
 #[derive(Clone)]
 pub struct GasPriceConfig {
     pub eia_api_key: String,
+    pub eia_region: String,
     pub poll_interval_secs: u64,
 }
 
@@ -51,12 +52,14 @@ impl Config {
         });
 
         let gas_prices = env::var("EIA_API_KEY").ok().map(|eia_api_key| {
+            let eia_region = env::var("EIA_REGION").unwrap_or_else(|_| "NUS".into());
             let poll_interval_secs = env::var("GAS_PRICE_POLL_INTERVAL_SECS")
                 .unwrap_or_else(|_| "86400".into())
                 .parse()
                 .unwrap_or(86400);
             GasPriceConfig {
                 eia_api_key,
+                eia_region,
                 poll_interval_secs,
             }
         });

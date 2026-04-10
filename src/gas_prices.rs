@@ -64,9 +64,9 @@ async fn fetch_and_store(config: &GasPriceConfig, pool: &Pool) -> Result<usize> 
 
     let url = format!(
         "{}?api_key={}&frequency=weekly&data[0]=value\
-         &facets[product][]=EPMR&facets[duoarea][]=NUS\
+         &facets[product][]=EPMR&facets[duoarea][]={}\
          &sort[0][column]=period&sort[0][direction]=desc&length=10",
-        EIA_GAS_PRICE_URL, config.eia_api_key
+        EIA_GAS_PRICE_URL, config.eia_api_key, config.eia_region
     );
 
     let resp = client
