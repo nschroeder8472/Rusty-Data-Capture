@@ -541,6 +541,108 @@
         "type": "postgres",
         "uid": "timescaledb"
       },
+      "description": "Percentage of non-Tesla consumption covered by solar production for the selected time range",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 25
+              },
+              {
+                "color": "yellow",
+                "value": 50
+              },
+              {
+                "color": "light-green",
+                "value": 75
+              },
+              {
+                "color": "green",
+                "value": 100
+              },
+              {
+                "color": "blue",
+                "value": 200
+              },
+              {
+                "color": "purple",
+                "value": 300
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 17
+      },
+      "id": 23,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT now() AS time, CASE WHEN (e.consumption - COALESCE(t.tesla, 0)) > 0 THEN e.solar / (e.consumption - COALESCE(t.tesla, 0)) * 100 ELSE 0 END AS \"Solar Offset excl Tesla (%)\" FROM (SELECT sum(solar_w) AS solar, sum(solar_w) + sum(grid_net_w) AS consumption FROM enphase_readings WHERE $__timeFilter(time)) e, (SELECT sum(charging_w) AS tesla FROM tesla_readings WHERE $__timeFilter(time)) t",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Solar Offset % (excl Tesla)",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "timescaledb"
+      },
       "description": "Solar production vs total consumption for the selected time range",
       "fieldConfig": {
         "defaults": {
@@ -596,8 +698,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 6,
-        "x": 6,
+        "w": 4,
+        "x": 12,
         "y": 17
       },
       "id": 16,
@@ -700,8 +802,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 12,
-        "x": 12,
+        "w": 8,
+        "x": 16,
         "y": 17
       },
       "id": 10,
