@@ -1,1795 +1,2300 @@
 {
-  "annotations": {
-    "list": [
-      {
-        "builtIn": 1,
-        "datasource": {
-          "type": "grafana",
-          "uid": "-- Grafana --"
-        },
-        "enable": true,
-        "hide": true,
-        "iconColor": "rgba(0, 211, 255, 1)",
-        "name": "Annotations & Alerts",
-        "type": "dashboard"
-      }
-    ]
+  "apiVersion": "dashboard.grafana.app/v2",
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "solar-energy-monitor",
+    "namespace": "default",
+    "uid": "af7c4c91-f5d3-4523-9355-5ebfefacd05c",
+    "resourceVersion": "1777178800511008",
+    "generation": 21,
+    "creationTimestamp": "2026-04-05T03:41:08Z",
+    "labels": {
+      "grafana.app/deprecatedInternalID": "505195334004736"
+    },
+    "annotations": {
+      "grafana.app/createdBy": "access-policy:service",
+      "grafana.app/folder": "",
+      "grafana.app/managedBy": "classic-file-provisioning",
+      "grafana.app/managerAllowsEdits": "true",
+      "grafana.app/managerId": "default",
+      "grafana.app/saved-from-ui": "Grafana v13.0.1 (a100054f21)",
+      "grafana.app/sourceChecksum": "f9358376fe7f9edebc4ea5afc009b5a8",
+      "grafana.app/sourcePath": "/var/lib/grafana/dashboards/solar-monitor.json",
+      "grafana.app/sourceTimestamp": "1776000888000",
+      "grafana.app/updatedBy": "user:ffd9t83vzoetcc",
+      "grafana.app/updatedTimestamp": "2026-04-26T04:46:40Z"
+    }
   },
-  "description": "Real-time solar production, home consumption, Tesla charging, and cost savings",
-  "editable": true,
-  "fiscalYearStartMonth": 0,
-  "graphTooltip": 1,
-  "links": [],
-  "panels": [
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 0
-      },
-      "id": 11,
-      "panels": [],
-      "title": "Current Status",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "timescaledb"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "dark-red",
-                "value": 0
-              },
-              {
-                "color": "yellow",
-                "value": 500
-              },
-              {
-                "color": "green",
-                "value": 1500
-              }
-            ]
-          },
-          "unit": "watt"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 8,
-        "x": 0,
-        "y": 1
-      },
-      "id": 1,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.4.2",
-      "targets": [
-        {
-          "format": "table",
-          "rawSql": "SELECT time, solar_w AS \"Solar (W)\" FROM enphase_readings WHERE $__timeFilter(time) ORDER BY time DESC LIMIT 1",
-          "refId": "A"
-        }
-      ],
-      "title": "Solar Generation",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "timescaledb"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "yellow",
-                "value": 3000
-              },
-              {
-                "color": "red",
-                "value": 5000
-              }
-            ]
-          },
-          "unit": "watt"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 8,
-        "x": 8,
-        "y": 1
-      },
-      "id": 2,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.4.2",
-      "targets": [
-        {
-          "format": "table",
-          "rawSql": "SELECT time, house_total_w AS \"House (W)\" FROM enphase_readings WHERE $__timeFilter(time) ORDER BY time DESC LIMIT 1",
-          "refId": "A"
-        }
-      ],
-      "title": "House Load",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "timescaledb"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "dark-blue",
-                "value": 0
-              },
-              {
-                "color": "blue",
-                "value": 1
-              },
-              {
-                "color": "purple",
-                "value": 5000
-              }
-            ]
-          },
-          "unit": "watt"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 8,
-        "x": 16,
-        "y": 1
-      },
-      "id": 3,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.4.2",
-      "targets": [
-        {
-          "format": "table",
-          "rawSql": "SELECT time, charging_w AS \"Charging (W)\" FROM tesla_readings WHERE $__timeFilter(time) ORDER BY time DESC LIMIT 1",
-          "refId": "A"
-        }
-      ],
-      "title": "Tesla Charging",
-      "type": "stat"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 5
-      },
-      "id": 12,
-      "panels": [],
-      "title": "Power Flow",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "timescaledb"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 20,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
+  "spec": {
+    "annotations": [
+      {
+        "kind": "AnnotationQuery",
+        "spec": {
+          "query": {
+            "kind": "DataQuery",
+            "group": "grafana",
+            "version": "v0",
+            "datasource": {
+              "name": "-- Grafana --"
             },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
+            "spec": {}
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "builtIn": true
+        }
+      }
+    ],
+    "cursorSync": "Crosshair",
+    "description": "Real-time solar production, home consumption, Tesla charging, and cost savings",
+    "editable": true,
+    "elements": {
+      "panel-1": {
+        "kind": "Panel",
+        "spec": {
+          "id": 1,
+          "title": "Solar Generation",
+          "description": "",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "postgres",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "timescaledb"
+                      },
+                      "spec": {
+                        "format": "table",
+                        "rawSql": "SELECT time, solar_w AS \"Solar (W)\" FROM enphase_readings WHERE $__timeFilter(time) ORDER BY time DESC LIMIT 1"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
             }
           },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "watt"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Solar"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "yellow",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "House (excl Tesla)"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "orange",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Grid"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "semi-dark-red",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Tesla"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "blue",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 10,
-        "w": 24,
-        "x": 0,
-        "y": 6
-      },
-      "id": 4,
-      "options": {
-        "legend": {
-          "calcs": [
-            "lastNotNull",
-            "mean",
-            "max"
-          ],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "pluginVersion": "12.4.2",
-      "targets": [
-        {
-          "format": "time_series",
-          "rawSql": "SELECT time_bucket('${interval}', time) AS time, avg(solar_w) AS \"Solar\" FROM enphase_readings WHERE $__timeFilter(time) GROUP BY 1 ORDER BY 1",
-          "refId": "A"
-        },
-        {
-          "format": "time_series",
-          "rawSql": "SELECT time_bucket('${interval}', e.time) AS time, avg(e.house_total_w) - COALESCE(avg(t.charging_w), 0) AS \"House (excl Tesla)\" FROM enphase_readings e LEFT JOIN tesla_readings t ON time_bucket('${interval}', e.time) = time_bucket('${interval}', t.time) WHERE $__timeFilter(e.time) GROUP BY 1 ORDER BY 1",
-          "refId": "B"
-        },
-        {
-          "format": "time_series",
-          "rawSql": "SELECT time_bucket('${interval}', time) AS time, avg(grid_net_w) AS \"Grid\" FROM enphase_readings WHERE $__timeFilter(time) GROUP BY 1 ORDER BY 1",
-          "refId": "C"
-        },
-        {
-          "format": "time_series",
-          "rawSql": "SELECT time_bucket('${interval}', time) AS time, avg(charging_w) AS \"Tesla\" FROM tesla_readings WHERE $__timeFilter(time) GROUP BY 1 ORDER BY 1",
-          "refId": "D"
-        }
-      ],
-      "title": "Real-Time Power Flow",
-      "type": "timeseries"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 16
-      },
-      "id": 13,
-      "panels": [],
-      "title": "Solar Offset",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "timescaledb"
-      },
-      "description": "Percentage of total consumption covered by solar production for the selected time range",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": 0
-              },
-              {
-                "color": "orange",
-                "value": 25
-              },
-              {
-                "color": "yellow",
-                "value": 50
-              },
-              {
-                "color": "light-green",
-                "value": 75
-              },
-              {
-                "color": "green",
-                "value": 100
-              },
-              {
-                "color": "blue",
-                "value": 200
-              },
-              {
-                "color": "purple",
-                "value": 300
-              }
-            ]
-          },
-          "unit": "percent"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 6,
-        "x": 0,
-        "y": 17
-      },
-      "id": 9,
-      "options": {
-        "minVizHeight": 75,
-        "minVizWidth": 75,
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "sizing": "auto"
-      },
-      "pluginVersion": "12.4.2",
-      "targets": [
-        {
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SELECT now() AS time, CASE WHEN (sum(solar_w) + sum(grid_net_w)) > 0 THEN sum(solar_w) / (sum(solar_w) + sum(grid_net_w)) * 100 ELSE 0 END AS \"Solar Offset (%)\" FROM enphase_readings WHERE $__timeFilter(time)",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "stat",
+            "version": "13.0.1",
+            "spec": {
+              "options": {
+                "colorMode": "background",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
                 },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "title": "Solar Offset %",
-      "type": "gauge"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "timescaledb"
-      },
-      "description": "Percentage of non-Tesla consumption covered by solar production for the selected time range",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": 0
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
               },
-              {
-                "color": "orange",
-                "value": 25
-              },
-              {
-                "color": "yellow",
-                "value": 50
-              },
-              {
-                "color": "light-green",
-                "value": 75
-              },
-              {
-                "color": "green",
-                "value": 100
-              },
-              {
-                "color": "blue",
-                "value": 200
-              },
-              {
-                "color": "purple",
-                "value": 300
-              }
-            ]
-          },
-          "unit": "percent"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 6,
-        "x": 6,
-        "y": 17
-      },
-      "id": 23,
-      "options": {
-        "minVizHeight": 75,
-        "minVizWidth": 75,
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "sizing": "auto"
-      },
-      "pluginVersion": "12.4.2",
-      "targets": [
-        {
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SELECT now() AS time, CASE WHEN (e.consumption - COALESCE(t.tesla, 0)) > 0 THEN e.solar / (e.consumption - COALESCE(t.tesla, 0)) * 100 ELSE 0 END AS \"Solar Offset excl Tesla (%)\" FROM (SELECT sum(solar_w) AS solar, sum(solar_w) + sum(grid_net_w) AS consumption FROM enphase_readings WHERE $__timeFilter(time)) e, (SELECT sum(charging_w) AS tesla FROM tesla_readings WHERE $__timeFilter(time)) t",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "watt",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "dark-red"
+                      },
+                      {
+                        "value": 500,
+                        "color": "yellow"
+                      },
+                      {
+                        "value": 1500,
+                        "color": "green"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  }
                 },
-                "type": "groupBy"
+                "overrides": []
               }
-            ],
-            "limit": 50
+            }
           }
         }
-      ],
-      "title": "Solar Offset % (excl Tesla)",
-      "type": "gauge"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "timescaledb"
       },
-      "description": "Solar production vs total consumption for the selected time range",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "#00d2ff"
-          },
-          "mappings": [],
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "kwatth"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Produced"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#00d2ff",
-                  "mode": "fixed"
+      "panel-10": {
+        "kind": "Panel",
+        "spec": {
+          "id": 10,
+          "title": "Solar Offset Over Time",
+          "description": "Solar production as a percentage of total consumption over time",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "postgres",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "timescaledb"
+                      },
+                      "spec": {
+                        "format": "time_series",
+                        "rawSql": "SELECT time_bucket('${interval}', time) AS time, CASE WHEN (sum(solar_w) + sum(grid_net_w)) > 0 THEN sum(solar_w) / (sum(solar_w) + sum(grid_net_w)) * 100 ELSE 0 END AS \"Solar Offset (%)\" FROM enphase_readings WHERE $__timeFilter(time) GROUP BY 1 ORDER BY 1"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
                 }
-              }
-            ]
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
           },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Consumed"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "orange",
-                  "mode": "fixed"
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "13.0.1",
+            "spec": {
+              "options": {
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "calcs": [
+                    "mean",
+                    "max"
+                  ],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
                 }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "percent",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "red"
+                      },
+                      {
+                        "value": 100,
+                        "color": "green"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "continuous-GrYlRd"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 20,
+                    "gradientMode": "scheme",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "smooth",
+                    "lineWidth": 2,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "never",
+                    "showValues": false,
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "area"
+                    }
+                  }
+                },
+                "overrides": []
               }
-            ]
+            }
           }
-        ]
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 12,
-        "y": 17
-      },
-      "id": 16,
-      "options": {
-        "displayMode": "basic",
-        "maxVizHeight": 300,
-        "minVizHeight": 16,
-        "minVizWidth": 8,
-        "namePlacement": "auto",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true,
-        "sizing": "auto",
-        "valueMode": "color"
-      },
-      "pluginVersion": "12.4.2",
-      "targets": [
-        {
-          "format": "table",
-          "rawSql": "SELECT now() AS time, round(CAST(sum(solar_w) * 10.0 / 3600.0 / 1000.0 AS numeric), 1) AS \"Produced\" FROM enphase_readings WHERE $__timeFilter(time)",
-          "refId": "A"
-        },
-        {
-          "format": "table",
-          "rawSql": "SELECT now() AS time, round(CAST(sum(house_total_w) * 10.0 / 3600.0 / 1000.0 AS numeric), 1) AS \"Consumed\" FROM enphase_readings WHERE $__timeFilter(time)",
-          "refId": "B"
         }
-      ],
-      "title": "Energy Balance",
-      "type": "bargauge"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "timescaledb"
       },
-      "description": "Solar production as a percentage of total consumption over time",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "continuous-GrYlRd"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 20,
-            "gradientMode": "scheme",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "area"
+      "panel-16": {
+        "kind": "Panel",
+        "spec": {
+          "id": 16,
+          "title": "Energy Balance",
+          "description": "Solar production vs total consumption for the selected time range",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "postgres",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "timescaledb"
+                      },
+                      "spec": {
+                        "format": "table",
+                        "rawSql": "SELECT now() AS time, round(CAST(sum(solar_w) * 10.0 / 3600.0 / 1000.0 AS numeric), 1) AS \"Produced\" FROM enphase_readings WHERE $__timeFilter(time)"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "postgres",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "timescaledb"
+                      },
+                      "spec": {
+                        "format": "table",
+                        "rawSql": "SELECT now() AS time, round(CAST(sum(house_total_w) * 10.0 / 3600.0 / 1000.0 AS numeric), 1) AS \"Consumed\" FROM enphase_readings WHERE $__timeFilter(time)"
+                      }
+                    },
+                    "refId": "B",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
             }
           },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": 0
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "bargauge",
+            "version": "13.0.1",
+            "spec": {
+              "options": {
+                "displayMode": "basic",
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": false
+                },
+                "maxVizHeight": 300,
+                "minVizHeight": 16,
+                "minVizWidth": 8,
+                "namePlacement": "auto",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showUnfilled": true,
+                "sizing": "auto",
+                "valueMode": "color"
               },
-              {
-                "color": "green",
-                "value": 100
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "kwatth",
+                  "min": 0,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "fixed",
+                    "fixedColor": "#00d2ff"
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Produced"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "#00d2ff",
+                          "mode": "fixed"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Consumed"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "orange",
+                          "mode": "fixed"
+                        }
+                      }
+                    ]
+                  }
+                ]
               }
-            ]
-          },
-          "unit": "percent"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 16,
-        "y": 17
-      },
-      "id": 10,
-      "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max"
-          ],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.4.2",
-      "targets": [
-        {
-          "format": "time_series",
-          "rawSql": "SELECT time_bucket('${interval}', time) AS time, CASE WHEN (sum(solar_w) + sum(grid_net_w)) > 0 THEN sum(solar_w) / (sum(solar_w) + sum(grid_net_w)) * 100 ELSE 0 END AS \"Solar Offset (%)\" FROM enphase_readings WHERE $__timeFilter(time) GROUP BY 1 ORDER BY 1",
-          "refId": "A"
-        }
-      ],
-      "title": "Solar Offset Over Time",
-      "type": "timeseries"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 23
-      },
-      "id": 14,
-      "panels": [],
-      "title": "Net Solar Balance",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "timescaledb"
-      },
-      "description": "Positive = exporting to grid, Negative = importing from grid",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "continuous-GrYlRd"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 30,
-            "gradientMode": "scheme",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "line"
             }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": 0
-              },
-              {
-                "color": "green",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "watt"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 24
-      },
-      "id": 5,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.4.2",
-      "targets": [
-        {
-          "format": "time_series",
-          "rawSql": "SELECT time_bucket('${interval}', time) AS time, avg(solar_w) - avg(house_total_w) AS \"Net Solar vs Total\" FROM enphase_readings WHERE $__timeFilter(time) GROUP BY 1 ORDER BY 1",
-          "refId": "A"
-        }
-      ],
-      "title": "Net Solar vs Total Load",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "timescaledb"
-      },
-      "description": "Positive = surplus solar after house, Negative = house deficit",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "continuous-GrYlRd"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 30,
-            "gradientMode": "scheme",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "line"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": 0
-              },
-              {
-                "color": "green",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "watt"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 24
-      },
-      "id": 6,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.4.2",
-      "targets": [
-        {
-          "format": "time_series",
-          "rawSql": "SELECT time_bucket('${interval}', e.time) AS time, avg(e.solar_w) - (avg(e.house_total_w) - COALESCE(avg(t.charging_w), 0)) AS \"Net Solar vs House Only\" FROM enphase_readings e LEFT JOIN tesla_readings t ON time_bucket('${interval}', e.time) = time_bucket('${interval}', t.time) WHERE $__timeFilter(e.time) GROUP BY 1 ORDER BY 1",
-          "refId": "A"
-        }
-      ],
-      "title": "Net Solar vs House Only (excl Tesla)",
-      "type": "timeseries"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 32
-      },
-      "id": 15,
-      "panels": [],
-      "title": "Cost Savings",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "timescaledb"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "fixedColor": "green",
-            "mode": "fixed"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "fillOpacity": 80,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineWidth": 1,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "currencyUSD"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 33
-      },
-      "id": 7,
-      "options": {
-        "barRadius": 0,
-        "barWidth": 0.8,
-        "fullHighlight": false,
-        "groupWidth": 0.7,
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "orientation": "auto",
-        "showValue": "auto",
-        "stacking": "none",
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        },
-        "xTickLabelRotation": 0,
-        "xTickLabelSpacing": 0
-      },
-      "pluginVersion": "12.4.2",
-      "targets": [
-        {
-          "format": "time_series",
-          "rawSql": "SELECT time_bucket('1 day', time AT TIME ZONE '${timezone}') AT TIME ZONE '${timezone}' AS time, (sum(solar_w) * 10.0 / 3600.0) * ${electric_rate} / 1000.0 AS \"Solar Savings ($)\" FROM enphase_readings WHERE $__timeFilter(time) GROUP BY 1 ORDER BY 1",
-          "refId": "A"
-        }
-      ],
-      "title": "Daily Solar Savings",
-      "type": "barchart"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "timescaledb"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "footer": {
-              "reducers": []
-            },
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
           }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Gas Cost ($)"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "currencyUSD"
-              }
-            ]
+        }
+      },
+      "panel-17": {
+        "kind": "Panel",
+        "spec": {
+          "id": 17,
+          "title": "Grid Cost (With Solar)",
+          "description": "Electricity cost from grid imports for the selected time range at the configured electric rate.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "postgres",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "timescaledb"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "SELECT now() AS time, round(CAST(sum(grid_net_w) * 10.0 / 3600.0 / 1000.0 * ${electric_rate} AS numeric), 2) AS \"Grid Cost ($)\" FROM enphase_readings WHERE $__timeFilter(time)",
+                        "sql": {
+                          "columns": [
+                            {
+                              "parameters": [],
+                              "type": "function"
+                            }
+                          ],
+                          "groupBy": [
+                            {
+                              "property": {
+                                "type": "string"
+                              },
+                              "type": "groupBy"
+                            }
+                          ],
+                          "limit": 50
+                        }
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
           },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Electric Cost ($)"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "currencyUSD"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Net Savings ($)"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "currencyUSD"
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "stat",
+            "version": "13.0.1",
+            "spec": {
+              "options": {
+                "colorMode": "background",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
               },
-              {
-                "id": "thresholds",
-                "value": {
-                  "mode": "absolute",
-                  "steps": [
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "currencyUSD",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 50,
+                        "color": "yellow"
+                      },
+                      {
+                        "value": 100,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-18": {
+        "kind": "Panel",
+        "spec": {
+          "id": 18,
+          "title": "Cost Without Solar",
+          "description": "What your electricity cost would be without solar, based on total house consumption at the configured electric rate.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "postgres",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "timescaledb"
+                      },
+                      "spec": {
+                        "format": "table",
+                        "rawSql": "SELECT now() AS time, round(CAST(sum(house_total_w) * 10.0 / 3600.0 / 1000.0 * ${electric_rate} AS numeric), 2) AS \"Without Solar ($)\" FROM enphase_readings WHERE $__timeFilter(time)"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "stat",
+            "version": "13.0.1",
+            "spec": {
+              "options": {
+                "colorMode": "background",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "currencyUSD",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 50,
+                        "color": "yellow"
+                      },
+                      {
+                        "value": 150,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-19": {
+        "kind": "Panel",
+        "spec": {
+          "id": 19,
+          "title": "Solar Savings",
+          "description": "Money saved on electricity for the selected time range thanks to solar generation offsetting grid imports.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "postgres",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "timescaledb"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "SELECT now() AS time, round(CAST((sum(house_total_w) - sum(GREATEST(grid_net_w))) * 10.0 / 3600.0 / 1000.0 * ${electric_rate} AS numeric), 2) AS \"Solar Savings ($)\" FROM enphase_readings WHERE $__timeFilter(time)",
+                        "sql": {
+                          "columns": [
+                            {
+                              "parameters": [],
+                              "type": "function"
+                            }
+                          ],
+                          "groupBy": [
+                            {
+                              "property": {
+                                "type": "string"
+                              },
+                              "type": "groupBy"
+                            }
+                          ],
+                          "limit": 50
+                        }
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "stat",
+            "version": "13.0.1",
+            "spec": {
+              "options": {
+                "colorMode": "background",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "currencyUSD",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "yellow"
+                      },
+                      {
+                        "value": 25,
+                        "color": "green"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-2": {
+        "kind": "Panel",
+        "spec": {
+          "id": 2,
+          "title": "House Load",
+          "description": "",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "postgres",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "timescaledb"
+                      },
+                      "spec": {
+                        "format": "table",
+                        "rawSql": "SELECT time, house_total_w AS \"House (W)\" FROM enphase_readings WHERE $__timeFilter(time) ORDER BY time DESC LIMIT 1"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "stat",
+            "version": "13.0.1",
+            "spec": {
+              "options": {
+                "colorMode": "background",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "watt",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 3000,
+                        "color": "yellow"
+                      },
+                      {
+                        "value": 5000,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-23": {
+        "kind": "Panel",
+        "spec": {
+          "id": 23,
+          "title": "Solar Offset % (excl Tesla)",
+          "description": "Percentage of non-Tesla consumption covered by solar production for the selected time range",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "postgres",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "timescaledb"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "SELECT now() AS time, CASE WHEN (e.consumption - COALESCE(t.tesla, 0)) > 0 THEN e.solar / (e.consumption - COALESCE(t.tesla, 0)) * 100 ELSE 0 END AS \"Solar Offset excl Tesla (%)\" FROM (SELECT sum(solar_w) AS solar, sum(solar_w) + sum(grid_net_w) AS consumption FROM enphase_readings WHERE $__timeFilter(time)) e, (SELECT sum(charging_w) AS tesla FROM tesla_readings WHERE $__timeFilter(time)) t",
+                        "sql": {
+                          "columns": [
+                            {
+                              "parameters": [],
+                              "type": "function"
+                            }
+                          ],
+                          "groupBy": [
+                            {
+                              "property": {
+                                "type": "string"
+                              },
+                              "type": "groupBy"
+                            }
+                          ],
+                          "limit": 50
+                        }
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "gauge",
+            "version": "13.0.1",
+            "spec": {
+              "options": {
+                "barShape": "flat",
+                "barWidthFactor": 0.5,
+                "effects": {
+                  "barGlow": false,
+                  "centerGlow": false,
+                  "gradient": false
+                },
+                "endpointMarker": "point",
+                "minVizHeight": 75,
+                "minVizWidth": 75,
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "segmentCount": 1,
+                "segmentSpacing": 0.3,
+                "shape": "gauge",
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "sizing": "auto",
+                "sparkline": false,
+                "textMode": "auto"
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "percent",
+                  "min": 0,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "red"
+                      },
+                      {
+                        "value": 25,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 50,
+                        "color": "yellow"
+                      },
+                      {
+                        "value": 75,
+                        "color": "light-green"
+                      },
+                      {
+                        "value": 100,
+                        "color": "green"
+                      },
+                      {
+                        "value": 200,
+                        "color": "blue"
+                      },
+                      {
+                        "value": 300,
+                        "color": "purple"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-3": {
+        "kind": "Panel",
+        "spec": {
+          "id": 3,
+          "title": "Tesla Charging",
+          "description": "",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "postgres",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "timescaledb"
+                      },
+                      "spec": {
+                        "format": "table",
+                        "rawSql": "SELECT time, charging_w AS \"Charging (W)\" FROM tesla_readings WHERE $__timeFilter(time) ORDER BY time DESC LIMIT 1"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "stat",
+            "version": "13.0.1",
+            "spec": {
+              "options": {
+                "colorMode": "background",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "watt",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "dark-blue"
+                      },
+                      {
+                        "value": 1,
+                        "color": "blue"
+                      },
+                      {
+                        "value": 5000,
+                        "color": "purple"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-4": {
+        "kind": "Panel",
+        "spec": {
+          "id": 4,
+          "title": "Real-Time Power Flow",
+          "description": "",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "postgres",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "timescaledb"
+                      },
+                      "spec": {
+                        "format": "time_series",
+                        "rawSql": "SELECT time_bucket('${interval}', time) AS time, avg(solar_w) AS \"Solar\" FROM enphase_readings WHERE $__timeFilter(time) GROUP BY 1 ORDER BY 1"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "postgres",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "timescaledb"
+                      },
+                      "spec": {
+                        "format": "time_series",
+                        "rawSql": "SELECT time_bucket('${interval}', e.time) AS time, avg(e.house_total_w) - COALESCE(avg(t.charging_w), 0) AS \"House (excl Tesla)\" FROM enphase_readings e LEFT JOIN tesla_readings t ON time_bucket('${interval}', e.time) = time_bucket('${interval}', t.time) WHERE $__timeFilter(e.time) GROUP BY 1 ORDER BY 1"
+                      }
+                    },
+                    "refId": "B",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "postgres",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "timescaledb"
+                      },
+                      "spec": {
+                        "format": "time_series",
+                        "rawSql": "SELECT time_bucket('${interval}', time) AS time, avg(grid_net_w) AS \"Grid\" FROM enphase_readings WHERE $__timeFilter(time) GROUP BY 1 ORDER BY 1"
+                      }
+                    },
+                    "refId": "C",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "postgres",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "timescaledb"
+                      },
+                      "spec": {
+                        "format": "time_series",
+                        "rawSql": "SELECT time_bucket('${interval}', time) AS time, avg(charging_w) AS \"Tesla\" FROM tesla_readings WHERE $__timeFilter(time) GROUP BY 1 ORDER BY 1"
+                      }
+                    },
+                    "refId": "D",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "13.0.1",
+            "spec": {
+              "options": {
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "calcs": [
+                    "lastNotNull",
+                    "mean",
+                    "max"
+                  ],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "watt",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 80,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 20,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "smooth",
+                    "lineWidth": 2,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "never",
+                    "showValues": false,
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Solar"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "yellow",
+                          "mode": "fixed"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "House (excl Tesla)"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "orange",
+                          "mode": "fixed"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Grid"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "semi-dark-red",
+                          "mode": "fixed"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Tesla"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "blue",
+                          "mode": "fixed"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "panel-5": {
+        "kind": "Panel",
+        "spec": {
+          "id": 5,
+          "title": "Net Solar vs Total Load",
+          "description": "Positive = exporting to grid, Negative = importing from grid",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "postgres",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "timescaledb"
+                      },
+                      "spec": {
+                        "format": "time_series",
+                        "rawSql": "SELECT time_bucket('${interval}', time) AS time, avg(solar_w) - avg(house_total_w) AS \"Net Solar vs Total\" FROM enphase_readings WHERE $__timeFilter(time) GROUP BY 1 ORDER BY 1"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "13.0.1",
+            "spec": {
+              "options": {
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "watt",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "red"
+                      },
+                      {
+                        "value": 0,
+                        "color": "green"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "continuous-GrYlRd"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 30,
+                    "gradientMode": "scheme",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "smooth",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "never",
+                    "showValues": false,
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "line"
+                    }
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-6": {
+        "kind": "Panel",
+        "spec": {
+          "id": 6,
+          "title": "Net Solar vs House Only (excl Tesla)",
+          "description": "Positive = surplus solar after house, Negative = house deficit",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "postgres",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "timescaledb"
+                      },
+                      "spec": {
+                        "format": "time_series",
+                        "rawSql": "SELECT time_bucket('${interval}', e.time) AS time, avg(e.solar_w) - (avg(e.house_total_w) - COALESCE(avg(t.charging_w), 0)) AS \"Net Solar vs House Only\" FROM enphase_readings e LEFT JOIN tesla_readings t ON time_bucket('${interval}', e.time) = time_bucket('${interval}', t.time) WHERE $__timeFilter(e.time) GROUP BY 1 ORDER BY 1"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "13.0.1",
+            "spec": {
+              "options": {
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "watt",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "red"
+                      },
+                      {
+                        "value": 0,
+                        "color": "green"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "continuous-GrYlRd"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 30,
+                    "gradientMode": "scheme",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "smooth",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "never",
+                    "showValues": false,
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "line"
+                    }
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-7": {
+        "kind": "Panel",
+        "spec": {
+          "id": 7,
+          "title": "Daily Solar Savings",
+          "description": "",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "postgres",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "timescaledb"
+                      },
+                      "spec": {
+                        "format": "time_series",
+                        "rawSql": "SELECT time_bucket('1 day', time AT TIME ZONE '${timezone}') AT TIME ZONE '${timezone}' AS time, (sum(solar_w) * 10.0 / 3600.0) * ${electric_rate} / 1000.0 AS \"Solar Savings ($)\" FROM enphase_readings WHERE $__timeFilter(time) GROUP BY 1 ORDER BY 1"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "barchart",
+            "version": "13.0.1",
+            "spec": {
+              "options": {
+                "barRadius": 0,
+                "barWidth": 0.8,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                },
+                "xTickLabelRotation": 0,
+                "xTickLabelSpacing": 0
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "currencyUSD",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 80,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "fixed",
+                    "fixedColor": "green"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "fillOpacity": 80,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "lineWidth": 1,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-8": {
+        "kind": "Panel",
+        "spec": {
+          "id": 8,
+          "title": "Tesla Fuel Savings",
+          "description": "",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "postgres",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "timescaledb"
+                      },
+                      "spec": {
+                        "format": "table",
+                        "rawSql": "WITH daily_charging AS ( SELECT time_bucket('1 day', time AT TIME ZONE '${timezone}') AT TIME ZONE '${timezone}' AS day, sum(charging_w) * 10.0 / 3600.0 / 1000.0 AS kwh FROM tesla_readings WHERE is_charging = TRUE AND $__timeFilter(time) GROUP BY 1 ), daily_gas AS ( SELECT dc.day, dc.kwh, COALESCE( (SELECT g.price_per_gallon FROM gas_prices g WHERE g.period <= dc.day::date ORDER BY g.period DESC LIMIT 1), ${gas_price} ) AS gp FROM daily_charging dc ) SELECT day AS \"Day\", round(CAST(kwh AS numeric), 2) AS \"kWh Charged\", round(CAST(kwh * ${tesla_efficiency} AS numeric), 1) AS \"Miles Equivalent\", round(CAST(gp AS numeric), 2) AS \"Gas Price ($/gal)\", round(CAST((kwh * ${tesla_efficiency} / ${ice_mpg}) * gp AS numeric), 2) AS \"Gas Cost ($)\", round(CAST(kwh * ${electric_rate} AS numeric), 2) AS \"Electric Cost ($)\", round(CAST((kwh * ${tesla_efficiency} / ${ice_mpg}) * gp - kwh * ${electric_rate} AS numeric), 2) AS \"Net Savings ($)\" FROM daily_gas ORDER BY day DESC"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "table",
+            "version": "13.0.1",
+            "spec": {
+              "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 80,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "custom": {
+                    "align": "auto",
+                    "cellOptions": {
+                      "type": "auto"
+                    },
+                    "footer": {
+                      "reducers": []
+                    },
+                    "inspect": false
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Gas Cost ($)"
+                    },
+                    "properties": [
+                      {
+                        "id": "unit",
+                        "value": "currencyUSD"
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Electric Cost ($)"
+                    },
+                    "properties": [
+                      {
+                        "id": "unit",
+                        "value": "currencyUSD"
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Net Savings ($)"
+                    },
+                    "properties": [
+                      {
+                        "id": "unit",
+                        "value": "currencyUSD"
+                      },
+                      {
+                        "id": "thresholds",
+                        "value": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "red",
+                              "value": 0
+                            },
+                            {
+                              "color": "green",
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "color-background"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byNames",
+                      "options": {
+                        "mode": "include",
+                        "names": [
+                          "kWh Charged",
+                          "Gas Cost ($)",
+                          "Electric Cost ($)",
+                          "Net Savings ($)"
+                        ]
+                      }
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.footer.reducers",
+                        "value": [
+                          "sum"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "panel-9": {
+        "kind": "Panel",
+        "spec": {
+          "id": 9,
+          "title": "Solar Offset %",
+          "description": "Percentage of total consumption covered by solar production for the selected time range",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "postgres",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "timescaledb"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "SELECT now() AS time, CASE WHEN (sum(solar_w) + sum(grid_net_w)) > 0 THEN sum(solar_w) / (sum(solar_w) + sum(grid_net_w)) * 100 ELSE 0 END AS \"Solar Offset (%)\" FROM enphase_readings WHERE $__timeFilter(time)",
+                        "sql": {
+                          "columns": [
+                            {
+                              "parameters": [],
+                              "type": "function"
+                            }
+                          ],
+                          "groupBy": [
+                            {
+                              "property": {
+                                "type": "string"
+                              },
+                              "type": "groupBy"
+                            }
+                          ],
+                          "limit": 50
+                        }
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "gauge",
+            "version": "13.0.1",
+            "spec": {
+              "options": {
+                "barShape": "flat",
+                "barWidthFactor": 0.5,
+                "effects": {
+                  "barGlow": false,
+                  "centerGlow": false,
+                  "gradient": false
+                },
+                "endpointMarker": "point",
+                "minVizHeight": 75,
+                "minVizWidth": 75,
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "segmentCount": 1,
+                "segmentSpacing": 0.3,
+                "shape": "gauge",
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "sizing": "auto",
+                "sparkline": false,
+                "textMode": "auto"
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "percent",
+                  "min": 0,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "red"
+                      },
+                      {
+                        "value": 25,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 50,
+                        "color": "yellow"
+                      },
+                      {
+                        "value": 75,
+                        "color": "light-green"
+                      },
+                      {
+                        "value": 100,
+                        "color": "green"
+                      },
+                      {
+                        "value": 200,
+                        "color": "blue"
+                      },
+                      {
+                        "value": 300,
+                        "color": "purple"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      }
+    },
+    "layout": {
+      "kind": "RowsLayout",
+      "spec": {
+        "rows": [
+          {
+            "kind": "RowsLayoutRow",
+            "spec": {
+              "title": "Current Status",
+              "collapse": false,
+              "layout": {
+                "kind": "GridLayout",
+                "spec": {
+                  "items": [
                     {
-                      "color": "red",
-                      "value": 0
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 0,
+                        "y": 0,
+                        "width": 8,
+                        "height": 4,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-1"
+                        }
+                      }
                     },
                     {
-                      "color": "green",
-                      "value": 0
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 8,
+                        "y": 0,
+                        "width": 8,
+                        "height": 4,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-2"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 16,
+                        "y": 0,
+                        "width": 8,
+                        "height": 4,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-3"
+                        }
+                      }
                     }
                   ]
                 }
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background"
-                }
               }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byNames",
-              "options": {
-                "mode": "include",
-                "names": [
-                  "kWh Charged",
-                  "Gas Cost ($)",
-                  "Electric Cost ($)",
-                  "Net Savings ($)"
-                ]
-              }
-            },
-            "properties": [
-              {
-                "id": "custom.footer.reducers",
-                "value": [
-                  "sum"
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 33
-      },
-      "id": 8,
-      "options": {
-        "cellHeight": "sm",
-        "showHeader": true
-      },
-      "pluginVersion": "12.4.2",
-      "targets": [
-        {
-          "format": "table",
-          "rawSql": "WITH daily_charging AS ( SELECT time_bucket('1 day', time AT TIME ZONE '${timezone}') AT TIME ZONE '${timezone}' AS day, sum(charging_w) * 10.0 / 3600.0 / 1000.0 AS kwh FROM tesla_readings WHERE is_charging = TRUE AND $__timeFilter(time) GROUP BY 1 ), daily_gas AS ( SELECT dc.day, dc.kwh, COALESCE( (SELECT g.price_per_gallon FROM gas_prices g WHERE g.period <= dc.day::date ORDER BY g.period DESC LIMIT 1), ${gas_price} ) AS gp FROM daily_charging dc ) SELECT day AS \"Day\", round(CAST(kwh AS numeric), 2) AS \"kWh Charged\", round(CAST(kwh * ${tesla_efficiency} AS numeric), 1) AS \"Miles Equivalent\", round(CAST(gp AS numeric), 2) AS \"Gas Price ($/gal)\", round(CAST((kwh * ${tesla_efficiency} / ${ice_mpg}) * gp AS numeric), 2) AS \"Gas Cost ($)\", round(CAST(kwh * ${electric_rate} AS numeric), 2) AS \"Electric Cost ($)\", round(CAST((kwh * ${tesla_efficiency} / ${ice_mpg}) * gp - kwh * ${electric_rate} AS numeric), 2) AS \"Net Savings ($)\" FROM daily_gas ORDER BY day DESC",
-          "refId": "A"
-        }
-      ],
-      "title": "Tesla Fuel Savings",
-      "type": "table"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 41
-      },
-      "id": 16,
-      "panels": [],
-      "title": "Electricity Cost",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "timescaledb"
-      },
-      "description": "Electricity cost from grid imports for the selected time range at the configured electric rate.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "yellow",
-                "value": 50
-              },
-              {
-                "color": "red",
-                "value": 100
-              }
-            ]
-          },
-          "unit": "currencyUSD"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 8,
-        "x": 0,
-        "y": 42
-      },
-      "id": 17,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.4.2",
-      "targets": [
-        {
-          "format": "table",
-          "rawSql": "SELECT now() AS time, round(CAST(sum(GREATEST(grid_net_w, 0)) * 10.0 / 3600.0 / 1000.0 * ${electric_rate} AS numeric), 2) AS \"Grid Cost ($)\" FROM enphase_readings WHERE $__timeFilter(time)",
-          "refId": "A"
-        }
-      ],
-      "title": "Grid Cost (With Solar)",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "timescaledb"
-      },
-      "description": "What your electricity cost would be without solar, based on total house consumption at the configured electric rate.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "yellow",
-                "value": 50
-              },
-              {
-                "color": "red",
-                "value": 150
-              }
-            ]
-          },
-          "unit": "currencyUSD"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 8,
-        "x": 8,
-        "y": 42
-      },
-      "id": 18,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.4.2",
-      "targets": [
-        {
-          "format": "table",
-          "rawSql": "SELECT now() AS time, round(CAST(sum(house_total_w) * 10.0 / 3600.0 / 1000.0 * ${electric_rate} AS numeric), 2) AS \"Without Solar ($)\" FROM enphase_readings WHERE $__timeFilter(time)",
-          "refId": "A"
-        }
-      ],
-      "title": "Cost Without Solar",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "timescaledb"
-      },
-      "description": "Money saved on electricity for the selected time range thanks to solar generation offsetting grid imports.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "yellow",
-                "value": 0
-              },
-              {
-                "color": "green",
-                "value": 25
-              }
-            ]
-          },
-          "unit": "currencyUSD"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 8,
-        "x": 16,
-        "y": 42
-      },
-      "id": 19,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.4.2",
-      "targets": [
-        {
-          "format": "table",
-          "rawSql": "SELECT now() AS time, round(CAST((sum(house_total_w) - sum(GREATEST(grid_net_w, 0))) * 10.0 / 3600.0 / 1000.0 * ${electric_rate} AS numeric), 2) AS \"Solar Savings ($)\" FROM enphase_readings WHERE $__timeFilter(time)",
-          "refId": "A"
-        }
-      ],
-      "title": "Solar Savings",
-      "type": "stat"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 46
-      },
-      "id": 20,
-      "panels": [],
-      "title": "Gasoline Prices",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "timescaledb"
-      },
-      "description": "Weekly U.S. average regular gasoline retail price from EIA",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "yellow",
-                "value": 3.5
-              },
-              {
-                "color": "red",
-                "value": 5.0
-              }
-            ]
-          },
-          "unit": "currencyUSD"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 8,
-        "x": 0,
-        "y": 47
-      },
-      "id": 21,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": true,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.4.2",
-      "targets": [
-        {
-          "format": "table",
-          "rawSql": "SELECT period AS time, price_per_gallon AS \"Gas Price ($/gal)\" FROM gas_prices ORDER BY period DESC LIMIT 1",
-          "refId": "A"
-        }
-      ],
-      "title": "Current Gas Price",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "timescaledb"
-      },
-      "description": "Weekly U.S. average regular gasoline price trend from EIA",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "fixedColor": "orange",
-            "mode": "fixed"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "$/gal",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 15,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
             }
           },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "currencyUSD"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 16,
-        "x": 8,
-        "y": 47
-      },
-      "id": 22,
-      "options": {
-        "legend": {
-          "calcs": [
-            "lastNotNull",
-            "min",
-            "max"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.4.2",
-      "targets": [
-        {
-          "format": "time_series",
-          "rawSql": "SELECT period AS time, price_per_gallon AS \"Regular Gasoline ($/gal)\" FROM gas_prices ORDER BY period ASC",
-          "refId": "A"
-        }
-      ],
-      "title": "Gas Price Trend",
-      "type": "timeseries"
-    }
-  ],
-  "preload": false,
-  "refresh": "5s",
-  "schemaVersion": 42,
-  "tags": [
-    "solar",
-    "energy",
-    "tesla",
-    "enphase"
-  ],
-  "templating": {
-    "list": [
-      {
-        "current": {
-          "text": "5 minutes",
-          "value": "5 minutes"
-        },
-        "label": "Interval",
-        "name": "interval",
-        "options": [],
-        "query": "1 minute,5 minutes,15 minutes,1 hour",
-        "type": "custom",
-        "valuesFormat": "csv"
-      },
-      {
-        "current": {
-          "text": "0.133",
-          "value": "0.133"
-        },
-        "label": "Electric Rate ($/kWh)",
-        "name": "electric_rate",
-        "options": [
           {
-            "selected": true,
+            "kind": "RowsLayoutRow",
+            "spec": {
+              "title": "Power Flow",
+              "collapse": false,
+              "layout": {
+                "kind": "GridLayout",
+                "spec": {
+                  "items": [
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 0,
+                        "y": 0,
+                        "width": 24,
+                        "height": 10,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-4"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "kind": "RowsLayoutRow",
+            "spec": {
+              "title": "Solar Offset",
+              "collapse": false,
+              "layout": {
+                "kind": "GridLayout",
+                "spec": {
+                  "items": [
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 0,
+                        "y": 0,
+                        "width": 6,
+                        "height": 6,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-9"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 6,
+                        "y": 0,
+                        "width": 6,
+                        "height": 6,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-23"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 12,
+                        "y": 0,
+                        "width": 4,
+                        "height": 6,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-16"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 16,
+                        "y": 0,
+                        "width": 8,
+                        "height": 6,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-10"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "kind": "RowsLayoutRow",
+            "spec": {
+              "title": "Net Solar Balance",
+              "collapse": false,
+              "layout": {
+                "kind": "GridLayout",
+                "spec": {
+                  "items": [
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 0,
+                        "y": 0,
+                        "width": 12,
+                        "height": 8,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-5"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 12,
+                        "y": 0,
+                        "width": 12,
+                        "height": 8,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-6"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "kind": "RowsLayoutRow",
+            "spec": {
+              "title": "Cost Savings",
+              "collapse": false,
+              "layout": {
+                "kind": "GridLayout",
+                "spec": {
+                  "items": [
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 0,
+                        "y": 0,
+                        "width": 12,
+                        "height": 8,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-7"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 12,
+                        "y": 0,
+                        "width": 12,
+                        "height": 8,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-8"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "kind": "RowsLayoutRow",
+            "spec": {
+              "title": "Electricity Cost",
+              "collapse": false,
+              "layout": {
+                "kind": "GridLayout",
+                "spec": {
+                  "items": [
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 0,
+                        "y": 0,
+                        "width": 8,
+                        "height": 4,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-17"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 8,
+                        "y": 0,
+                        "width": 8,
+                        "height": 4,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-18"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 16,
+                        "y": 0,
+                        "width": 8,
+                        "height": 4,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-19"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "links": [],
+    "liveNow": false,
+    "preload": false,
+    "tags": [
+      "solar",
+      "energy",
+      "tesla",
+      "enphase"
+    ],
+    "timeSettings": {
+      "timezone": "browser",
+      "from": "now/d",
+      "to": "now/d",
+      "autoRefresh": "5s",
+      "autoRefreshIntervals": [
+        "5s",
+        "10s",
+        "30s",
+        "1m",
+        "5m"
+      ],
+      "hideTimepicker": false,
+      "fiscalYearStartMonth": 0
+    },
+    "title": "Solar Energy Monitor",
+    "variables": [
+      {
+        "kind": "CustomVariable",
+        "spec": {
+          "name": "interval",
+          "query": "1 minute,5 minutes,15 minutes,1 hour",
+          "current": {
+            "text": "5 minutes",
+            "value": "5 minutes"
+          },
+          "options": [],
+          "multi": false,
+          "includeAll": false,
+          "label": "Interval",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "allowCustomValue": true,
+          "valuesFormat": "csv"
+        }
+      },
+      {
+        "kind": "TextVariable",
+        "spec": {
+          "name": "electric_rate",
+          "current": {
             "text": "0.133",
             "value": "0.133"
-          }
-        ],
-        "query": "0.133",
-        "type": "textbox"
+          },
+          "query": "0.133",
+          "label": "Electric Rate ($/kWh)",
+          "hide": "dontHide",
+          "skipUrlSync": false
+        }
       },
       {
-        "current": {
-          "text": "4.00",
-          "value": "4.00"
-        },
-        "datasource": {
-          "type": "postgres",
-          "uid": "timescaledb"
-        },
-        "definition": "SELECT COALESCE((SELECT price_per_gallon::text FROM gas_prices ORDER BY period DESC LIMIT 1), '4.00')",
-        "label": "Gas Price ($/gal)",
-        "name": "gas_price",
-        "query": "SELECT COALESCE((SELECT price_per_gallon::text FROM gas_prices ORDER BY period DESC LIMIT 1), '4.00')",
-        "refresh": 2,
-        "type": "query"
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "gas_price",
+          "current": {
+            "text": "4.00",
+            "value": "4.00"
+          },
+          "label": "Gas Price ($/gal)",
+          "hide": "dontHide",
+          "refresh": "onTimeRangeChanged",
+          "skipUrlSync": false,
+          "query": {
+            "kind": "DataQuery",
+            "group": "postgres",
+            "version": "v0",
+            "datasource": {
+              "name": "timescaledb"
+            },
+            "spec": {
+              "__legacyStringValue": "SELECT COALESCE((SELECT price_per_gallon::text FROM gas_prices ORDER BY period DESC LIMIT 1), '4.00')"
+            }
+          },
+          "regex": "",
+          "regexApplyTo": "value",
+          "sort": "disabled",
+          "definition": "SELECT COALESCE((SELECT price_per_gallon::text FROM gas_prices ORDER BY period DESC LIMIT 1), '4.00')",
+          "options": [],
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": true
+        }
       },
       {
-        "current": {
-          "text": "3.5",
-          "value": "3.5"
-        },
-        "label": "Tesla Efficiency (mi/kWh)",
-        "name": "tesla_efficiency",
-        "options": [
-          {
-            "selected": true,
+        "kind": "TextVariable",
+        "spec": {
+          "name": "tesla_efficiency",
+          "current": {
             "text": "3.5",
             "value": "3.5"
-          }
-        ],
-        "query": "3.5",
-        "type": "textbox"
+          },
+          "query": "3.5",
+          "label": "Tesla Efficiency (mi/kWh)",
+          "hide": "dontHide",
+          "skipUrlSync": false
+        }
       },
       {
-        "current": {
-          "text": "28.0",
-          "value": "28.0"
-        },
-        "label": "ICE MPG",
-        "name": "ice_mpg",
-        "options": [
-          {
-            "selected": true,
+        "kind": "TextVariable",
+        "spec": {
+          "name": "ice_mpg",
+          "current": {
             "text": "28.0",
             "value": "28.0"
-          }
-        ],
-        "query": "28.0",
-        "type": "textbox"
+          },
+          "query": "28.0",
+          "label": "ICE MPG",
+          "hide": "dontHide",
+          "skipUrlSync": false
+        }
       },
       {
-        "current": {
-          "text": "America/New_York",
-          "value": "America/New_York"
-        },
-        "description": "IANA timezone name for daily bucketing (e.g. America/Chicago, America/New_York, America/Los_Angeles)",
-        "label": "Timezone",
-        "name": "timezone",
-        "options": [
-          {
-            "selected": true,
+        "kind": "TextVariable",
+        "spec": {
+          "name": "timezone",
+          "current": {
             "text": "America/New_York",
             "value": "America/New_York"
-          }
-        ],
-        "query": "America/New_York",
-        "type": "textbox"
+          },
+          "query": "America/New_York",
+          "label": "Timezone",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "description": "IANA timezone name for daily bucketing (e.g. America/Chicago, America/New_York, America/Los_Angeles)"
+        }
       }
     ]
-  },
-  "time": {
-    "from": "now/d",
-    "to": "now/d"
-  },
-  "timepicker": {
-    "refresh_intervals": [
-      "5s",
-      "10s",
-      "30s",
-      "1m",
-      "5m"
-    ]
-  },
-  "timezone": "browser",
-  "title": "Solar Energy Monitor",
-  "uid": "solar-energy-monitor",
-  "version": 9,
-  "weekStart": ""
+  }
 }
