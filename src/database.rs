@@ -34,6 +34,9 @@ pub async fn ensure_schema(pool: &Pool) -> Result<()> {
                 solar_s          DOUBLE PRECISION,
                 solar_i          DOUBLE PRECISION,
                 solar_pf         DOUBLE PRECISION,
+                -- house_total_w is derived (production + grid_net_w); house_q/s/i
+                -- are NULL while the gateway mirrors net into total-consumption.
+                -- See schema.sql for the full explanation.
                 house_total_w    DOUBLE PRECISION,
                 house_q          DOUBLE PRECISION,
                 house_s          DOUBLE PRECISION,
@@ -180,6 +183,8 @@ pub async fn insert_enphase_reading(
                 &reading.solar_i,
                 &reading.solar_pf,
                 &reading.house_total_w,
+                // Option<f64>: NULL while the gateway mirrors net-consumption
+                // into total-consumption, since these cannot be derived.
                 &reading.house_q,
                 &reading.house_s,
                 &reading.house_i,
