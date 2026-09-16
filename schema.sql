@@ -13,10 +13,18 @@ CREATE TABLE IF NOT EXISTS enphase_readings (
     solar_s          DOUBLE PRECISION,   -- apparent power (VA)
     solar_i          DOUBLE PRECISION,   -- current (A)
     solar_pf         DOUBLE PRECISION,   -- power factor
+    -- Derived as raw production + grid_net_w, not read from the gateway's
+    -- total-consumption section. Firmware D8.3.5433 mirrors net-consumption into
+    -- that section (observed 2026-08-04 onward), which made house load track the
+    -- grid and go negative during export.
     house_total_w    DOUBLE PRECISION,
-    house_q          DOUBLE PRECISION,   -- reactive power (VAR)
-    house_s          DOUBLE PRECISION,   -- apparent power (VA)
-    house_i          DOUBLE PRECISION,   -- current (A)
+    -- NULL whenever the gateway is mirroring: reactive and apparent power do not
+    -- sum linearly across a production/net split, and no grid_i is recorded, so
+    -- these cannot be derived. NULL is deliberate — a visible gap beats a
+    -- plausible wrong number.
+    house_q          DOUBLE PRECISION,   -- reactive power (VAR), nullable
+    house_s          DOUBLE PRECISION,   -- apparent power (VA), nullable
+    house_i          DOUBLE PRECISION,   -- current (A), nullable
     grid_net_w       DOUBLE PRECISION,   -- negative = exporting
     grid_q           DOUBLE PRECISION,   -- reactive power (VAR)
     grid_s           DOUBLE PRECISION    -- apparent power (VA)
