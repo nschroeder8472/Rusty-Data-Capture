@@ -35,7 +35,7 @@ cd docker && docker compose up -d        # full stack (needs .env)
 
 ## DB schema
 
-Two hypertables: `enphase_readings` and `tesla_readings` with separate sampling rates. Four continuous aggregates (5min + hourly for each). 90-day raw retention. Cost metrics are computed at query time in Grafana, not stored.
+Two hypertables: `enphase_readings` and `tesla_readings` with separate sampling rates. Four continuous aggregates (5min + hourly for each), refreshed by policy. 2-year raw retention; the aggregates never expire and hold history beyond it. Cost metrics are computed at query time in Grafana, not stored.
 
 ## Design doc
 

@@ -6,7 +6,7 @@ A real-time solar energy monitoring system built in Rust. Collects data from an 
 
 - **Enphase solar monitoring** — SSE stream capturing solar production, house consumption, and grid import/export at ~1s resolution
 - **Tesla Wall Connector tracking** — HTTP polling for charging power, session energy, and lifetime stats
-- **TimescaleDB storage** — hypertables with automatic 5-minute and hourly continuous aggregates, 90-day raw data retention
+- **TimescaleDB storage** — hypertables with automatic 5-minute and hourly continuous aggregates, 2-year raw data retention
 - **Grafana dashboard** — 8 pre-built panels including real-time power flow, net solar balance, and cost savings analysis
 - **Lightweight** — async Rust binary suitable for Raspberry Pi or NAS deployment
 
