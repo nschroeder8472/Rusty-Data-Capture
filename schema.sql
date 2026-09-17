@@ -118,7 +118,7 @@ GROUP BY bucket;
 -- refreshed by hand and silently goes stale (tesla_5min and tesla_hourly sat
 -- frozen from 2026-04-06 to 2026-09-17 for exactly this reason).
 --
--- start_offset stays far short of the 90-day retention below. Refreshing a
+-- start_offset stays far short of the retention window below. Refreshing a
 -- window whose raw rows have already been dropped would delete the materialized
 -- history for that window — the very thing these aggregates exist to preserve.
 SELECT add_continuous_aggregate_policy('enphase_5min',
@@ -134,6 +134,13 @@ SELECT add_continuous_aggregate_policy('tesla_hourly',
     start_offset => INTERVAL '7 days', end_offset => INTERVAL '1 hour',
     schedule_interval => INTERVAL '30 minutes', if_not_exists => TRUE);
 
--- Retention policy: keep raw data for 90 days
-SELECT add_retention_policy('enphase_readings', INTERVAL '90 days', if_not_exists => TRUE);
-SELECT add_retention_policy('tesla_readings', INTERVAL '90 days', if_not_exists => TRUE);
+-- Retention policy: keep raw data for 2 years (~1.2 GB/year for both tables).
+-- Older data survives in the continuous aggregates above, which have no retention.
+--
+-- Dropped first because add_retention_policy(if_not_exists => TRUE) is a no-op
+-- when a policy already exists — it does NOT update the interval. Without the
+-- drop, changing this value here would silently never reach an existing database.
+SELECT remove_retention_policy('enphase_readings', if_exists => TRUE);
+SELECT remove_retention_policy('tesla_readings', if_exists => TRUE);
+SELECT add_retention_policy('enphase_readings', INTERVAL '2 years', if_not_exists => TRUE);
+SELECT add_retention_policy('tesla_readings', INTERVAL '2 years', if_not_exists => TRUE);

@@ -149,7 +149,7 @@ pub async fn ensure_schema(pool: &Pool) -> Result<()> {
     // refreshed by hand, so it silently goes stale — tesla_5min and tesla_hourly
     // sat frozen from 2026-04-06 to 2026-09-17 for exactly this reason.
     //
-    // start_offset is deliberately far short of the 90-day retention below.
+    // start_offset is deliberately far short of the retention window below.
     // Refreshing a window whose raw rows have already been dropped would delete
     // the materialized history for that window, which is the one thing these
     // aggregates exist to preserve.
@@ -171,11 +171,18 @@ pub async fn ensure_schema(pool: &Pool) -> Result<()> {
         .await
         .context("Failed to set continuous aggregate refresh policies")?;
 
-    // Retention policies
+    // Retention policies: 2 years of raw data (~1.2 GB/year for both tables).
+    // Anything older survives in the continuous aggregates, which never expire.
+    //
+    // Dropped first because add_retention_policy(if_not_exists => TRUE) is a no-op
+    // when a policy already exists — it does NOT update the interval. Without the
+    // drop, changing this value would silently never reach an existing database.
     client
         .batch_execute(
-            "SELECT add_retention_policy('enphase_readings', INTERVAL '90 days', if_not_exists => TRUE);
-            SELECT add_retention_policy('tesla_readings', INTERVAL '90 days', if_not_exists => TRUE);",
+            "SELECT remove_retention_policy('enphase_readings', if_exists => TRUE);
+            SELECT remove_retention_policy('tesla_readings', if_exists => TRUE);
+            SELECT add_retention_policy('enphase_readings', INTERVAL '2 years', if_not_exists => TRUE);
+            SELECT add_retention_policy('tesla_readings', INTERVAL '2 years', if_not_exists => TRUE);",
         )
         .await
         .context("Failed to set retention policies")?;
