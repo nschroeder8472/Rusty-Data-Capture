@@ -2,7 +2,11 @@ apiVersion: 1
 
 datasources:
   - name: TimescaleDB
-    type: postgres
+    # Canonical plugin ID. "postgres" still works as an alias for resolving the
+    # plugin, but provisioning stores this string verbatim in data_source.type,
+    # and dashboards do not alias-resolve it — panels fail to bind to the
+    # datasource on every restart until it is re-saved in the UI.
+    type: grafana-postgresql-datasource
     uid: timescaledb
     url: timescaledb:5432
     user: solar
