@@ -145,6 +145,32 @@ pub async fn ensure_schema(pool: &Pool) -> Result<()> {
         }
     }
 
+    // Refresh policies. Without these a continuous aggregate only updates when
+    // refreshed by hand, so it silently goes stale — tesla_5min and tesla_hourly
+    // sat frozen from 2026-04-06 to 2026-09-17 for exactly this reason.
+    //
+    // start_offset is deliberately far short of the 90-day retention below.
+    // Refreshing a window whose raw rows have already been dropped would delete
+    // the materialized history for that window, which is the one thing these
+    // aggregates exist to preserve.
+    client
+        .batch_execute(
+            "SELECT add_continuous_aggregate_policy('enphase_5min',
+                start_offset => INTERVAL '1 day', end_offset => INTERVAL '10 minutes',
+                schedule_interval => INTERVAL '5 minutes', if_not_exists => TRUE);
+            SELECT add_continuous_aggregate_policy('enphase_hourly',
+                start_offset => INTERVAL '7 days', end_offset => INTERVAL '1 hour',
+                schedule_interval => INTERVAL '30 minutes', if_not_exists => TRUE);
+            SELECT add_continuous_aggregate_policy('tesla_5min',
+                start_offset => INTERVAL '1 day', end_offset => INTERVAL '10 minutes',
+                schedule_interval => INTERVAL '5 minutes', if_not_exists => TRUE);
+            SELECT add_continuous_aggregate_policy('tesla_hourly',
+                start_offset => INTERVAL '7 days', end_offset => INTERVAL '1 hour',
+                schedule_interval => INTERVAL '30 minutes', if_not_exists => TRUE);",
+        )
+        .await
+        .context("Failed to set continuous aggregate refresh policies")?;
+
     // Retention policies
     client
         .batch_execute(
